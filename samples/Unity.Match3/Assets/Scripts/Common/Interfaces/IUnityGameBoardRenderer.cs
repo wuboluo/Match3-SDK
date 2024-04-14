@@ -10,7 +10,7 @@ namespace Common.Interfaces
         bool IsTileActive(GridPosition gridPosition);
         void ActivateTile(GridPosition gridPosition);
         void DeactivateTile(GridPosition gridPosition);
-        void SetNextGridTileGroup(GridPosition gridPosition);
+        void SetNextGridTileType(GridPosition gridPosition);
 
         bool IsPositionOnGrid(GridPosition gridPosition);
         bool IsPointerOnGrid(Vector3 worldPointerPosition, out GridPosition gridPosition);
@@ -18,6 +18,6 @@ namespace Common.Interfaces
 
         Vector3 GetWorldPosition(GridPosition gridPosition);
 
-        TileGroup GetTileGroup(GridPosition gridPosition);
+        TileType GetTileType(GridPosition gridPosition);
     }
 }

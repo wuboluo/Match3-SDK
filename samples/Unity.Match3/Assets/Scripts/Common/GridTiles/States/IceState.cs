@@ -5,22 +5,22 @@ namespace Common.GridTiles.States
     public class IceState : StatefulGridTile
     {
         private bool _isLocked = true;
-        private int _group = (int) TileGroup.Ice;
+        private int _group = (int) TileType.Ice;
 
-        public override int GroupId => _group;
+        public override int TypeId => _group;
         public override bool IsLocked => _isLocked;
         public override bool CanContainItem => true;
 
         protected override void OnComplete()
         {
             _isLocked = false;
-            _group = (int) TileGroup.Available;
+            _group = (int) TileType.Available;
         }
 
         protected override void OnReset()
         {
             _isLocked = true;
-            _group = (int) TileGroup.Ice;
+            _group = (int) TileType.Ice;
         }
     }
 }

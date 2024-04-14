@@ -5,8 +5,7 @@ namespace Match3.App
 {
     public class SolvedData<TGridSlot> where TGridSlot : IGridSlot
     {
-        public SolvedData(IReadOnlyCollection<ItemSequence<TGridSlot>> solvedSequences,
-            IReadOnlyCollection<TGridSlot> specialItemGridSlots)
+        public SolvedData(IReadOnlyCollection<ItemSequence<TGridSlot>> solvedSequences, IReadOnlyCollection<TGridSlot> specialItemGridSlots)
         {
             SolvedSequences = solvedSequences;
             SpecialItemGridSlots = specialItemGridSlots;

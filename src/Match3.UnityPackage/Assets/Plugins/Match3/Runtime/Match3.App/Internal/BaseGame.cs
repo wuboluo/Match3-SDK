@@ -40,7 +40,7 @@ namespace Match3.App.Internal
                 throw new InvalidOperationException("Can not be initialized while the current game is active.");
             }
 
-            _gameBoard.SetGridSlots(_gameBoardDataProvider.GetGameBoardSlots(level));
+            _gameBoard.SetGridSlots(_gameBoardDataProvider.GetGridSlots(level));
             _levelGoals = _levelGoalsProvider.GetLevelGoals(level, _gameBoard);
         }
 

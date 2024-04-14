@@ -49,7 +49,7 @@ namespace Common
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void EnsureItemIsNotNull(IUnityItem item)
+        private static void EnsureItemIsNotNull(IUnityItem item)
         {
             if (item == null)
             {

@@ -6,8 +6,7 @@ namespace Common.Extensions
 {
     public static class GameBoardExtensions
     {
-        public static bool CanMoveDown(this IGameBoard<IUnityGridSlot> gameBoard, IUnityGridSlot gridSlot,
-            out GridPosition gridPosition)
+        public static bool CanMoveDown(this IGameBoard<IUnityGridSlot> gameBoard, IUnityGridSlot gridSlot, out GridPosition gridPosition)
         {
             var bottomGridSlot = gameBoard.GetSideGridSlot(gridSlot, GridPosition.Down);
             if (bottomGridSlot is { CanSetItem: true })

@@ -10,33 +10,41 @@ namespace Common
 {
     public class TileItemsPool
     {
-        private readonly Transform _itemsContainer;
-        private readonly Dictionary<TileGroup, GameObject> _tilePrefabs;
-        private readonly Dictionary<TileGroup, Queue<IGridTile>> _itemsPool;
+        // tile gameObject 父节点
+        private readonly Transform _itemsParent;
 
-        public TileItemsPool(IReadOnlyCollection<TileModel> tiles, Transform itemsContainer)
+        // 每种tile的池
+        private readonly Dictionary<TileType, Queue<IGridTile>> _itemsPool;
+
+        // 每种tile的prefab
+        private readonly Dictionary<TileType, GameObject> _tilePrefabs;
+
+        public TileItemsPool(IReadOnlyCollection<TileModel> tiles, Transform itemsParent)
         {
-            _itemsContainer = itemsContainer;
-            _itemsPool = new Dictionary<TileGroup, Queue<IGridTile>>(tiles.Count);
-            _tilePrefabs = new Dictionary<TileGroup, GameObject>(tiles.Count);
+            _itemsParent = itemsParent;
+            _itemsPool = new Dictionary<TileType, Queue<IGridTile>>(tiles.Count);
+            _tilePrefabs = new Dictionary<TileType, GameObject>(tiles.Count);
 
+            // 创建所有tile类型的池
             foreach (var tile in tiles)
             {
-                _tilePrefabs.Add(tile.Group, tile.Prefab);
-                _itemsPool.Add(tile.Group, new Queue<IGridTile>());
+                _tilePrefabs.Add(tile.Type, tile.Prefab);
+                _itemsPool.Add(tile.Type, new Queue<IGridTile>());
             }
         }
 
-        public IGridTile GetGridTile(TileGroup tileGroup)
+        // 从池中拿一个指定类型的 tile gameObject
+        public IGridTile FetchTile(TileType tileType)
         {
-            var tiles = _itemsPool[tileGroup];
-            var gridTile = tiles.Count == 0 ? CreateTile(_tilePrefabs[tileGroup]) : tiles.Dequeue();
+            var pool = _itemsPool[tileType];
+            var gridTile = pool.Count == 0 ? NewTile(_tilePrefabs[tileType]) : pool.Dequeue();
             gridTile.SetActive(true);
 
             return gridTile;
         }
 
-        public void ReturnGridTile(IGridTile gridTile)
+        // 回收一个 tile 回池中
+        public void RecycleTile(IGridTile gridTile)
         {
             if (gridTile is IStatefulSlot statefulSlot)
             {
@@ -44,12 +52,13 @@ namespace Common
             }
 
             gridTile.SetActive(false);
-            _itemsPool[(TileGroup) gridTile.GroupId].Enqueue(gridTile);
+            _itemsPool[(TileType)gridTile.TypeId].Enqueue(gridTile);
         }
 
-        private IGridTile CreateTile(GameObject tilePrefab)
+        // 创建一个新的 tile gameObject
+        private IGridTile NewTile(GameObject tilePrefab)
         {
-            return tilePrefab.CreateNew<IGridTile>(parent: _itemsContainer);
+            return tilePrefab.CreateNew<IGridTile>(parent: _itemsParent);
         }
     }
 }

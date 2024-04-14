@@ -136,7 +136,7 @@ namespace Common.GameModes
         {
             if (_gameBoardRenderer.IsTileActive(gridPosition))
             {
-                _gameBoardRenderer.SetNextGridTileGroup(gridPosition);
+                _gameBoardRenderer.SetNextGridTileType(gridPosition);
             }
         }
     }

@@ -7,9 +7,9 @@ namespace Match3.Infrastructure.Extensions
     {
         public static void Deactivate(this IGameMode gameMode)
         {
-            if (gameMode is IDeactivatable deactivatable)
+            if (gameMode is IDeactivatable deactivation)
             {
-                deactivatable.Deactivate();
+                deactivation.Deactivate();
             }
         }
 

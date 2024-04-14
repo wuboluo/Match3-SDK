@@ -4,6 +4,6 @@ namespace Match3.App.Interfaces
 {
     public interface IGameBoardDataProvider<out TGridSlot> where TGridSlot : IGridSlot
     {
-        TGridSlot[,] GetGameBoardSlots(int level);
+        TGridSlot[,] GetGridSlots(int level);
     }
 }

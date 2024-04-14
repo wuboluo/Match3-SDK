@@ -2,6 +2,7 @@
 
 namespace Match3.Core.Interfaces
 {
+    // 格子
     public interface IGridSlot
     {
         int ItemId { get; }

@@ -6,31 +6,39 @@ using Match3.App;
 using Match3.App.Interfaces;
 using Match3.Core.Interfaces;
 using Match3.Core.Structs;
+using UnityEngine;
 
 namespace Match3.Infrastructure
 {
+    /// 游戏消除器
     public class GameBoardSolver<TGridSlot> : IGameBoardSolver<TGridSlot> where TGridSlot : IGridSlot
     {
-        private readonly ISpecialItemDetector<TGridSlot>[] _specialItemDetectors;
-        private readonly ISequenceDetector<TGridSlot>[] _sequenceDetectors;
+        // 方向序列检测器
+        private readonly ISequenceDetector<TGridSlot>[] _dirSequenceDetectors;
 
-        public GameBoardSolver(ISequenceDetector<TGridSlot>[] sequenceDetectors,
-            ISpecialItemDetector<TGridSlot>[] specialItemDetectors)
+        // 特殊道具检测器
+        private readonly ISpecialItemDetector<TGridSlot>[] _specialItemDetectors;
+
+        public GameBoardSolver(ISequenceDetector<TGridSlot>[] dirSequenceDetectors, ISpecialItemDetector<TGridSlot>[] specialItemDetectors)
         {
-            _sequenceDetectors = sequenceDetectors;
+            _dirSequenceDetectors = dirSequenceDetectors;
             _specialItemDetectors = specialItemDetectors;
         }
 
+        /// 消除
         public SolvedData<TGridSlot> Solve(IGameBoard<TGridSlot> gameBoard, params GridPosition[] gridPositions)
         {
+            Debug.Log("消除");
+
             var resultSequences = new Collection<ItemSequence<TGridSlot>>();
             var specialItemGridSlots = new HashSet<TGridSlot>();
 
             foreach (var gridPosition in gridPositions)
             {
-                foreach (var sequenceDetector in _sequenceDetectors)
+                // 横向 纵向
+                foreach (var dirSeqDetector in _dirSequenceDetectors)
                 {
-                    var sequence = sequenceDetector.GetSequence(gameBoard, gridPosition);
+                    var sequence = dirSeqDetector.GetSequence(gameBoard, gridPosition);
                     if (sequence == null)
                     {
                         continue;
@@ -53,18 +61,16 @@ namespace Match3.Infrastructure
             return new SolvedData<TGridSlot>(resultSequences, specialItemGridSlots);
         }
 
-        private bool IsNewSequence(ItemSequence<TGridSlot> newSequence, IEnumerable<ItemSequence<TGridSlot>> sequences)
+        private static bool IsNewSequence(ItemSequence<TGridSlot> newSequence, IEnumerable<ItemSequence<TGridSlot>> sequences)
         {
-            var sequencesByType =
-                sequences.Where(sequence => sequence.SequenceDetectorType == newSequence.SequenceDetectorType);
+            var sequencesByType = sequences.Where(sequence => sequence.SequenceDetectorType == newSequence.SequenceDetectorType);
             var newSequenceGridSlot = newSequence.SolvedGridSlots[0];
 
             return sequencesByType.All(sequence => sequence.SolvedGridSlots.Contains(newSequenceGridSlot) == false);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private IEnumerable<TGridSlot> GetSpecialItemGridSlots(IGameBoard<TGridSlot> gameBoard,
-            ItemSequence<TGridSlot> sequence)
+        private IEnumerable<TGridSlot> GetSpecialItemGridSlots(IGameBoard<TGridSlot> gameBoard, ItemSequence<TGridSlot> sequence)
         {
             foreach (var itemDetector in _specialItemDetectors)
             {
@@ -72,7 +78,7 @@ namespace Match3.Infrastructure
                 {
                     foreach (var specialItemGridSlot in itemDetector.GetSpecialItemGridSlots(gameBoard, solvedGridSlot))
                     {
-                        var hasNextState = ((IStatefulSlot) specialItemGridSlot.State).NextState();
+                        var hasNextState = ((IStatefulSlot)specialItemGridSlot.State).NextState();
                         if (hasNextState)
                         {
                             continue;

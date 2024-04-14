@@ -12,7 +12,10 @@ namespace Match3.App
             SolvedGridSlots = solvedGridSlots;
         }
 
+        // 序列检测器类型
         public Type SequenceDetectorType { get; }
+
+        // 消除的格子集合
         public IReadOnlyList<TGridSlot> SolvedGridSlots { get; }
     }
 }

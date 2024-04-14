@@ -41,8 +41,7 @@ namespace Match3.App.Internal
 
         public bool IsPositionOnBoard(GridPosition gridPosition)
         {
-            return IsPositionOnGrid(gridPosition) &&
-                   _gridSlots[gridPosition.RowIndex, gridPosition.ColumnIndex].CanContainItem;
+            return IsPositionOnGrid(gridPosition) && _gridSlots[gridPosition.RowIndex, gridPosition.ColumnIndex].CanContainItem;
         }
 
         public void ResetState()

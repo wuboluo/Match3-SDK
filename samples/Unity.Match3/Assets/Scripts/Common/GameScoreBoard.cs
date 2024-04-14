@@ -6,6 +6,7 @@ using UnityEngine;
 
 namespace Common
 {
+    /// 游戏计分板
     public class GameScoreBoard : ISolvedSequencesConsumer<IUnityGridSlot>
     {
         public void OnSequencesSolved(SolvedData<IUnityGridSlot> solvedData)
@@ -16,21 +17,22 @@ namespace Common
             }
         }
 
-        private void RegisterSequenceScore(ItemSequence<IUnityGridSlot> sequence)
+        /// 注册序列分数
+        private static void RegisterSequenceScore(ItemSequence<IUnityGridSlot> sequence)
         {
             Debug.Log(GetSequenceDescription(sequence));
         }
 
-        private string GetSequenceDescription(ItemSequence<IUnityGridSlot> sequence)
+        private static string GetSequenceDescription(ItemSequence<IUnityGridSlot> sequence)
         {
             var stringBuilder = new StringBuilder();
-            stringBuilder.Append("ContentId <color=yellow>");
-            stringBuilder.Append(sequence.SolvedGridSlots[0].Item.ContentId);
-            stringBuilder.Append("</color> | <color=yellow>");
-            stringBuilder.Append(sequence.SequenceDetectorType.Name);
-            stringBuilder.Append("</color> sequence of <color=yellow>");
-            stringBuilder.Append(sequence.SolvedGridSlots.Count);
-            stringBuilder.Append("</color> elements");
+
+            var detectorType = sequence.SequenceDetectorType.Name.Contains("Ver") ? "纵向" : "横向";
+            stringBuilder.Append($"棋子种类：<color=yellow>{sequence.SolvedGridSlots[0].Item.ContentId}</color>");
+            stringBuilder.Append("  |  ");
+            stringBuilder.Append($"方向：<color=yellow>{detectorType}</color>");
+            stringBuilder.Append("  |  ");
+            stringBuilder.Append($"数量：<color=yellow>{sequence.SolvedGridSlots.Count}</color>");
 
             return stringBuilder.ToString();
         }
