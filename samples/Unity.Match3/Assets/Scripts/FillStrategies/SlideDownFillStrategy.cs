@@ -85,7 +85,7 @@ namespace FillStrategies
                     continue;
                 }
 
-                jobs.Add(new ItemsFallJob(GetGenerateJobs(gameBoard, columnIndex), delayMultiplier, executionOrder));
+                jobs.Add(new ItemsRiseJob(GetGenerateJobs(gameBoard, columnIndex), delayMultiplier, executionOrder));
             }
 
             return jobs;
@@ -102,7 +102,7 @@ namespace FillStrategies
                 var itemGeneratorPosition = new GridPosition(-1, columnIndex);
                 item.SetWorldPosition(GetWorldPosition(itemGeneratorPosition));
 
-                var dropPositions = FilterPositions(gridSlot.GridPosition, GetDropPositions(gameBoard, gridSlot));
+                var dropPositions = FilterPositions(gridSlot.GridPosition, GetRisePositions(gameBoard, gridSlot));
                 if (dropPositions.Count == 0)
                 {
                     gridSlot.SetItem(item);
@@ -110,7 +110,7 @@ namespace FillStrategies
                     break;
                 }
 
-                var destinationGridPosition = dropPositions[dropPositions.Count - 1];
+                var destinationGridPosition = dropPositions[^1];
                 var destinationGridSlot = gameBoard[destinationGridPosition];
 
                 destinationGridSlot.SetItem(item);
@@ -137,6 +137,26 @@ namespace FillStrategies
             }
 
             return jobs;
+        }
+
+        private static bool CanDropFromTop(IGameBoard<IUnityGridSlot> gameBoard, GridPosition gridPosition)
+        {
+            // 被消除的格子位置
+            var rowIndex = gridPosition.RowIndex;
+            var columnIndex = gridPosition.ColumnIndex;
+
+            while (rowIndex >= 0)
+            {
+                var gridSlot = gameBoard[rowIndex, columnIndex];
+                if (gridSlot.NotAvailable)
+                {
+                    return false;
+                }
+
+                rowIndex--;
+            }
+
+            return true;
         }
 
         /// 某行中需要移动的棋子
@@ -183,7 +203,7 @@ namespace FillStrategies
                 return null;
             }
 
-            var dropPositions = FilterPositions(gridSlot.GridPosition, GetDropPositions(gameBoard, gridSlot));
+            var dropPositions = FilterPositions(gridSlot.GridPosition, GetRisePositions(gameBoard, gridSlot));
             if (dropPositions.Count == 0)
             {
                 return null;
@@ -196,62 +216,44 @@ namespace FillStrategies
             return new ItemMoveData(item, dropPositions.Select(GetWorldPosition).ToArray());
         }
 
-        private static bool CanDropFromTop(IGameBoard<IUnityGridSlot> gameBoard, GridPosition gridPosition)
+        /// 上升经过的格子集合
+        private static List<GridPosition> GetRisePositions(IGameBoard<IUnityGridSlot> gameBoard, IUnityGridSlot gridSlot)
         {
-            return CanDropFromTop(gameBoard, gridPosition.RowIndex, gridPosition.ColumnIndex);
-        }
+            var riseGridPositions = new List<GridPosition>();
 
-        private static bool CanDropFromTop(IGameBoard<IUnityGridSlot> gameBoard, int rowIndex, int columnIndex)
-        {
-            while (rowIndex >= 0)
+            // 直到上方临格不是空格
+            while (gameBoard.CanMoveUp(gridSlot, out var upGridPosition))
             {
-                var gridSlot = gameBoard[rowIndex, columnIndex];
-                if (gridSlot.NotAvailable)
-                {
-                    return false;
-                }
-
-                rowIndex--;
+                gridSlot = gameBoard[upGridPosition];
+                riseGridPositions.Add(upGridPosition);
             }
 
-            return true;
-        }
-
-        private static List<GridPosition> GetDropPositions(IGameBoard<IUnityGridSlot> gameBoard, IUnityGridSlot gridSlot)
-        {
-            var dropGridPositions = new List<GridPosition>();
-
-            while (gameBoard.CanMoveDown(gridSlot, out var downGridPosition))
+            // 能否可以斜方向滑落
+            if (!CanRiseDiagonally(gameBoard, gridSlot, out var diagonalGridPosition))
             {
-                gridSlot = gameBoard[downGridPosition];
-                dropGridPositions.Add(downGridPosition);
+                return riseGridPositions;
             }
 
-            if (!CanDropDiagonally(gameBoard, gridSlot, out var diagonalGridPosition))
-            {
-                return dropGridPositions;
-            }
+            riseGridPositions.Add(diagonalGridPosition);
+            riseGridPositions.AddRange(GetRisePositions(gameBoard, gameBoard[diagonalGridPosition]));
 
-            dropGridPositions.Add(diagonalGridPosition);
-            dropGridPositions.AddRange(GetDropPositions(gameBoard, gameBoard[diagonalGridPosition]));
-
-            return dropGridPositions;
+            return riseGridPositions;
         }
 
-        private static bool CanDropDiagonally(IGameBoard<IUnityGridSlot> gameBoard, IUnityGridSlot gridSlot, out GridPosition gridPosition)
+        private static bool CanRiseDiagonally(IGameBoard<IUnityGridSlot> gameBoard, IUnityGridSlot gridSlot, out GridPosition gridPosition)
         {
-            return CanDropDiagonally(gameBoard, gridSlot, GridPosition.Left, out gridPosition) ||
-                   CanDropDiagonally(gameBoard, gridSlot, GridPosition.Right, out gridPosition);
+            return CanRiseDiagonally(gameBoard, gridSlot, GridPosition.Left, out gridPosition) ||
+                   CanRiseDiagonally(gameBoard, gridSlot, GridPosition.Right, out gridPosition);
         }
 
-        private static bool CanDropDiagonally(IGameBoard<IUnityGridSlot> gameBoard, IUnityGridSlot gridSlot, GridPosition direction, out GridPosition gridPosition)
+        private static bool CanRiseDiagonally(IGameBoard<IUnityGridSlot> gameBoard, IUnityGridSlot gridSlot, GridPosition direction, out GridPosition gridPosition)
         {
             var sideGridSlot = gameBoard.GetSideGridSlot(gridSlot, direction);
-            var downGridSlot = gameBoard.GetSideGridSlot(gridSlot, GridPosition.Down);
+            var upGridSlot = gameBoard.GetSideGridSlot(gridSlot, GridPosition.Up);
 
-            if (sideGridSlot is { NotAvailable: true } && downGridSlot != null && !downGridSlot.State.IsLocked)
+            if (sideGridSlot is { NotAvailable: true } && upGridSlot != null && !upGridSlot.State.IsLocked)
             {
-                return gameBoard.CanMoveDown(sideGridSlot, out gridPosition);
+                return gameBoard.CanMoveUp(sideGridSlot, out gridPosition);
             }
 
             gridPosition = GridPosition.Zero;

@@ -69,7 +69,7 @@ namespace Common
             gridPosition = GetGridPositionByPointer(worldPointerPosition);
             return IsPositionOnGrid(gridPosition);
         }
-        
+
         /// 该位置在棋盘内且该位置的棋子已启用
         private bool IsPositionOnBoard(GridPosition gridPosition)
         {
@@ -84,10 +84,10 @@ namespace Common
         /// 通过鼠标位置获取格子行列位置
         private GridPosition GetGridPositionByPointer(Vector3 worldPointerPosition)
         {
-            var rowIndex = (worldPointerPosition - _originPosition).y / _tileSize;
-            var columnIndex = (worldPointerPosition - _originPosition).x / _tileSize;
+            var rowIndex = Convert.ToInt32((worldPointerPosition - _originPosition).y / _tileSize);
+            var columnIndex = Convert.ToInt32((worldPointerPosition - _originPosition).x / _tileSize);
 
-            return new GridPosition(Convert.ToInt32(-rowIndex), Convert.ToInt32(columnIndex));
+            return new GridPosition(rowIndex, columnIndex);
         }
 
         /// 把一个位置的棋子：启用
@@ -140,7 +140,6 @@ namespace Common
             DisposeGameBoardData();
         }
 
-
         // 根据行列确定坐标
         public Vector3 GetWorldPosition(GridPosition gridPosition)
         {
@@ -149,17 +148,17 @@ namespace Common
 
         private Vector3 GetWorldPosition(int rowIndex, int columnIndex)
         {
-            return new Vector3(columnIndex, -rowIndex) * _tileSize + _originPosition;
+            return new Vector3(columnIndex, rowIndex) * _tileSize + _originPosition;
         }
 
-        // 开始排列的原点位置，从左上角开始，一行一行以此排列
+        // 开始排列的原点位置，从左下角开始，一行一行以此排列
         // 这样保证棋盘中心在 (0,0)点
         private Vector3 GetOriginPosition(int rowCount, int columnCount)
         {
             var offsetY = Mathf.Floor(rowCount / 2.0f) * _tileSize;
             var offsetX = Mathf.Floor(columnCount / 2.0f) * _tileSize;
 
-            return new Vector3(-offsetX, offsetY);
+            return new Vector3(-offsetX, -offsetY);
         }
 
         // 开局的时候创建所有的棋子

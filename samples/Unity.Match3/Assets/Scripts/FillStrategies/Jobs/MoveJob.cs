@@ -14,7 +14,7 @@ namespace FillStrategies.Jobs
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        protected Tween CreateItemMoveTween(ItemMoveData data)
+        protected static Tween CreateItemMoveTween(ItemMoveData data)
         {
             return data.Item.Transform.DOPath(data.WorldPositions, MoveDuration);
         }

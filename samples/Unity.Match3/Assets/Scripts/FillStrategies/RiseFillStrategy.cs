@@ -9,20 +9,22 @@ using Match3.Core.Structs;
 
 namespace FillStrategies
 {
-    public class FallDownFillStrategy : BaseFillStrategy
+    public class RiseFillStrategy : BaseFillStrategy
     {
-        public FallDownFillStrategy(IAppContext appContext) : base(appContext)
+        public RiseFillStrategy(IAppContext appContext) : base(appContext)
         {
         }
 
-        public override string Name => "Fall Down Fill Strategy";
+        public override string Name => "Rise Fill Strategy";
 
+        /// 消除Jobs
         public override IEnumerable<IJob> GetSolveJobs(IGameBoard<IUnityGridSlot> gameBoard, SolvedData<IUnityGridSlot> solvedData)
         {
             var jobs = new List<IJob>();
             var itemsToHide = new List<IUnityItem>();
             var solvedGridSlots = new HashSet<IUnityGridSlot>();
 
+            // 记录序列中消除的棋子
             foreach (var solvedGridSlot in solvedData.GetSolvedGridSlots())
             {
                 if (solvedGridSlot.IsMovable == false)
@@ -30,6 +32,7 @@ namespace FillStrategies
                     continue;
                 }
 
+                // 用hashSet是为了可以在TL型过滤掉共用的棋子
                 if (!solvedGridSlots.Add(solvedGridSlot))
                 {
                     continue;
@@ -42,6 +45,7 @@ namespace FillStrategies
                 RecycleItemToPool(currentItem);
             }
 
+            // 被特殊消除的棋子
             foreach (var specialItemGridSlot in solvedData.GetSpecialItemGridSlots())
             {
                 solvedGridSlots.Add(specialItemGridSlot);
@@ -52,6 +56,7 @@ namespace FillStrategies
                 var itemsMoveData = GetItemsMoveData(gameBoard, solvedGridSlot.GridPosition.ColumnIndex);
                 if (itemsMoveData.Count != 0)
                 {
+                    // 道具移动Job
                     jobs.Add(new ItemsMoveJob(itemsMoveData));
                 }
             }
@@ -63,72 +68,85 @@ namespace FillStrategies
             return jobs;
         }
 
+        /// 获取某一列上发生移动的格子的道具和其终点位置
         private List<ItemMoveData> GetItemsMoveData(IGameBoard<IUnityGridSlot> gameBoard, int columnIndex)
         {
-            var itemsDropData = new List<ItemMoveData>();
+            var itemsRiseData = new List<ItemMoveData>();
 
+            // 从地图最上一行依次向下
             for (var rowIndex = gameBoard.RowCount - 1; rowIndex >= 0; rowIndex--)
             {
+                // 每行中指定列的格子
                 var gridSlot = gameBoard[rowIndex, columnIndex];
-                if (gridSlot.IsMovable == false)
+                if (!gridSlot.IsMovable)
                 {
                     continue;
                 }
 
-                if (CanDropDown(gameBoard, gridSlot, out var destinationGridPosition) == false)
+                // 这个格子能否向上移动
+                if (!CanRise(gameBoard, gridSlot, out var destinationGridPosition))
                 {
                     continue;
                 }
 
                 var item = gridSlot.Item;
                 gridSlot.Clear();
-                itemsDropData.Add(
-                    new ItemMoveData(item, new[] { GetWorldPosition(destinationGridPosition) }));
+                itemsRiseData.Add(new ItemMoveData(item, new[] { GetWorldPosition(destinationGridPosition) }));
                 gameBoard[destinationGridPosition].SetItem(item);
             }
 
-            itemsDropData.Reverse();
-            return itemsDropData;
+            itemsRiseData.Reverse();
+            return itemsRiseData;
         }
 
+        /// 填充Jobs，包含所有存在格子移动的列
         private IEnumerable<IJob> GetFillJobs(IGameBoard<IUnityGridSlot> gameBoard, int delayMultiplier)
         {
             var jobs = new List<IJob>();
 
             for (var columnIndex = 0; columnIndex < gameBoard.ColumnCount; columnIndex++)
             {
-                var itemsDropData = new List<ItemMoveData>();
+                // 每一列的上升填充Job
+                var itemsRiseData = new List<ItemMoveData>();
 
                 for (var rowIndex = 0; rowIndex < gameBoard.RowCount; rowIndex++)
                 {
                     var gridSlot = gameBoard[rowIndex, columnIndex];
-                    if (gridSlot.CanSetItem == false)
+                    if (!gridSlot.CanSetItem)
                     {
+                        // 障碍就不填充，跳过
                         continue;
                     }
 
+                    // 生成道具在该列合适的行数
                     var item = FetchItemFromPool();
                     var itemGeneratorPosition = GetItemGeneratorPosition(gameBoard, rowIndex, columnIndex);
                     item.SetWorldPosition(GetWorldPosition(itemGeneratorPosition));
 
-                    var itemDropData =
-                        new ItemMoveData(item, new[] { GetWorldPosition(gridSlot.GridPosition) });
+                    // 给这个道具绑定一个移动到对应行的移动Job
+                    var itemRiseData = new ItemMoveData(item, new[] { GetWorldPosition(gridSlot.GridPosition) });
 
+                    // 格子绑定道具
                     gridSlot.SetItem(item);
-                    itemsDropData.Add(itemDropData);
+
+                    // 该列上升Job包含每个格子的移动
+                    itemsRiseData.Add(itemRiseData);
                 }
 
-                if (itemsDropData.Count > 0)
+                // 如果此列存在需要移动的格子
+                if (itemsRiseData.Count > 0)
                 {
-                    jobs.Add(new ItemsFallJob(itemsDropData, delayMultiplier));
+                    jobs.Add(new ItemsRiseJob(itemsRiseData, delayMultiplier));
                 }
             }
 
             return jobs;
         }
 
-        private GridPosition GetItemGeneratorPosition(IGameBoard<IUnityGridSlot> gameBoard, int rowIndex, int columnIndex)
+        /// 获取道具生成位置
+        private static GridPosition GetItemGeneratorPosition(IGameBoard<IUnityGridSlot> gameBoard, int rowIndex, int columnIndex)
         {
+            // 从消除位置依次向下检查，如果碰到障碍，就从障碍处生成
             while (rowIndex >= 0)
             {
                 var gridSlot = gameBoard[rowIndex, columnIndex];
@@ -140,19 +158,23 @@ namespace FillStrategies
                 rowIndex--;
             }
 
+            // 默认从最下面行下面生成
             return new GridPosition(-1, columnIndex);
         }
 
-        private bool CanDropDown(IGameBoard<IUnityGridSlot> gameBoard, IUnityGridSlot gridSlot,
-            out GridPosition destinationGridPosition)
+        /// 能否上升
+        private static bool CanRise(IGameBoard<IUnityGridSlot> gameBoard, IUnityGridSlot gridSlot, out GridPosition destinationGridPosition)
         {
+            // 目的地格子位置
             var destinationGridSlot = gridSlot;
 
-            while (gameBoard.CanMoveDown(destinationGridSlot, out var bottomGridPosition))
+            // 直到上方临格不为空，否则目的地格子就依次向上
+            while (gameBoard.CanMoveUp(destinationGridSlot, out var topGridPosition))
             {
-                destinationGridSlot = gameBoard[bottomGridPosition];
+                destinationGridSlot = gameBoard[topGridPosition];
             }
 
+            // 如果目的地和当前的一样，说明开始时上方就不为空，那么就无法上移
             destinationGridPosition = destinationGridSlot.GridPosition;
             return destinationGridSlot != gridSlot;
         }

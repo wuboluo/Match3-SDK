@@ -12,9 +12,7 @@ namespace Match3.App
 {
     public abstract class Match3Game<TGridSlot> : BaseGame<TGridSlot> where TGridSlot : IGridSlot
     {
-        private readonly JobsExecutor _jobsExecutor;
         private readonly IItemSwapper<TGridSlot> _itemSwapper;
-
         private AsyncLazy _swapItemsTask;
         
         // 填充策略
@@ -23,7 +21,6 @@ namespace Match3.App
         protected Match3Game(GameConfig<TGridSlot> config) : base(config)
         {
             _itemSwapper = config.ItemSwapper;
-            _jobsExecutor = new JobsExecutor();
         }
 
         private bool IsSwapItemsCompleted
@@ -64,6 +61,7 @@ namespace Match3.App
             RaiseGameFinishedAsync().Forget();
         }
 
+        /// 棋盘填充
         private async UniTask FillAsync(IBoardFillStrategy<TGridSlot> fillStrategy, CancellationToken cancellationToken = default)
         {
             await ExecuteJobsAsync(fillStrategy.GetFillJobs(GameBoard), cancellationToken);
@@ -111,9 +109,9 @@ namespace Match3.App
             await _itemSwapper.SwapItemsAsync(gridSlot1, gridSlot2, cancellationToken);
         }
 
-        private UniTask ExecuteJobsAsync(IEnumerable<IJob> jobs, CancellationToken cancellationToken = default)
+        private static UniTask ExecuteJobsAsync(IEnumerable<IJob> jobs, CancellationToken cancellationToken = default)
         {
-            return _jobsExecutor.ExecuteJobsAsync(jobs, cancellationToken);
+            return JobsExecutor.ExecuteJobsAsync(jobs, cancellationToken);
         }
 
         private async UniTask RaiseGameFinishedAsync()

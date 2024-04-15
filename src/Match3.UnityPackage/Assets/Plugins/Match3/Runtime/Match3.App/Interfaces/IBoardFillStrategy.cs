@@ -7,7 +7,10 @@ namespace Match3.App.Interfaces
     {
         string Name { get; }
 
+        /// 填充Jobs
         IEnumerable<IJob> GetFillJobs(IGameBoard<TGridSlot> gameBoard);
+        
+        /// 消除Jobs
         IEnumerable<IJob> GetSolveJobs(IGameBoard<TGridSlot> gameBoard, SolvedData<TGridSlot> solvedData);
     }
 }

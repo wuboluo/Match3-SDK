@@ -32,8 +32,10 @@ namespace Match3.App.Internal
 
         public bool IsPositionOnGrid(GridPosition gridPosition)
         {
+            // 确保棋盘不为空
             EnsureGridSlotsIsNotNull();
 
+            // 在棋盘范围内
             return GridMath.IsPositionOnGrid(this, gridPosition);
         }
 

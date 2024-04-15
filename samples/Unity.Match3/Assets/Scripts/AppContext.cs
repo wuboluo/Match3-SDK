@@ -111,7 +111,7 @@ public class AppContext : MonoBehaviour, IAppContext
         return new IBoardFillStrategy<IUnityGridSlot>[]
         {
             new SimpleFillStrategy(this),
-            new FallDownFillStrategy(this),
+            new RiseFillStrategy(this),
             new SlideDownFillStrategy(this)
         };
     }

@@ -31,7 +31,9 @@ namespace Common.GameModes
             _unityGame.LevelGoalAchieved += OnLevelGoalAchieved;
             _gameUiCanvas.StrategyChanged += OnStrategyChanged;
 
+            // 设置填充策略
             _unityGame.SetGameBoardFillStrategy(GetSelectedFillStrategy());
+            // 开始游戏 生成格子
             _unityGame.StartAsync().Forget();
 
             _gameUiCanvas.ShowMessage("Game started.");
@@ -56,6 +58,7 @@ namespace Common.GameModes
             _unityGame.SetGameBoardFillStrategy(GetFillStrategy(index));
         }
 
+        /// 选择的填充策略
         private IBoardFillStrategy<IUnityGridSlot> GetSelectedFillStrategy()
         {
             return GetFillStrategy(_gameUiCanvas.SelectedFillStrategyIndex);

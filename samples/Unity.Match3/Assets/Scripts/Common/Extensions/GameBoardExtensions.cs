@@ -6,12 +6,14 @@ namespace Common.Extensions
 {
     public static class GameBoardExtensions
     {
-        public static bool CanMoveDown(this IGameBoard<IUnityGridSlot> gameBoard, IUnityGridSlot gridSlot, out GridPosition gridPosition)
+        /// 能否向上移动
+        public static bool CanMoveUp(this IGameBoard<IUnityGridSlot> gameBoard, IUnityGridSlot gridSlot, out GridPosition gridPosition)
         {
-            var bottomGridSlot = gameBoard.GetSideGridSlot(gridSlot, GridPosition.Down);
-            if (bottomGridSlot is { CanSetItem: true })
+            // 如果该位置上方一个位置为空（被消除了），那么就可以上移
+            var topGridSlot = gameBoard.GetSideGridSlot(gridSlot, GridPosition.Up);
+            if (topGridSlot is { CanSetItem: true })
             {
-                gridPosition = bottomGridSlot.GridPosition;
+                gridPosition = topGridSlot.GridPosition;
                 return true;
             }
 
@@ -19,6 +21,7 @@ namespace Common.Extensions
             return false;
         }
 
+        /// 获取某格子相邻的某方向的临格
         public static IUnityGridSlot GetSideGridSlot(this IGameBoard<IUnityGridSlot> gameBoard, IUnityGridSlot gridSlot, GridPosition direction)
         {
             var sideGridSlotPosition = gridSlot.GridPosition + direction;

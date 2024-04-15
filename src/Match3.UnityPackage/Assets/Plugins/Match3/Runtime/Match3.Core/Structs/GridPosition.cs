@@ -15,29 +15,18 @@ namespace Match3.Core.Structs
 
         public int ColumnIndex { get; }
 
-        /// <summary>
-        ///   <para>Shorthand for writing GridPosition(-1, 0).</para>
-        /// </summary>
-        public static GridPosition Up { get; } = new(-1, 0);
+        // 行+1
+        public static GridPosition Up { get; } = new(1, 0);
 
-        /// <summary>
-        ///   <para>Shorthand for writing GridPosition(1, 0).</para>
-        /// </summary>
-        public static GridPosition Down { get; } = new(1, 0);
+        // 行-1
+        public static GridPosition Down { get; } = new(-1, 0);
 
-        /// <summary>
-        ///   <para>Shorthand for writing GridPosition(0, -1).</para>
-        /// </summary>
+        // 列-1
         public static GridPosition Left { get; } = new(0, -1);
 
-        /// <summary>
-        ///   <para>Shorthand for writing GridPosition(0, 1).</para>
-        /// </summary>
+        // 列+1
         public static GridPosition Right { get; } = new(0, 1);
 
-        /// <summary>
-        ///   <para>Shorthand for writing GridPosition(0, 0).</para>
-        /// </summary>
         public static GridPosition Zero { get; } = new(0, 0);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

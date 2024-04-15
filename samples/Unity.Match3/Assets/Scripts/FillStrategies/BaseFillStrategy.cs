@@ -23,6 +23,7 @@ namespace FillStrategies
 
         public abstract string Name { get; }
 
+        /// 棋盘填充满Jobs
         public virtual IEnumerable<IJob> GetFillJobs(IGameBoard<IUnityGridSlot> gameBoard)
         {
             var itemsToShow = new List<IUnityItem>();
@@ -32,7 +33,7 @@ namespace FillStrategies
                 for (var columnIndex = 0; columnIndex < gameBoard.ColumnCount; columnIndex++)
                 {
                     var gridSlot = gameBoard[rowIndex, columnIndex];
-                    if (gridSlot.CanSetItem == false)
+                    if (!gridSlot.CanSetItem)
                     {
                         continue;
                     }
