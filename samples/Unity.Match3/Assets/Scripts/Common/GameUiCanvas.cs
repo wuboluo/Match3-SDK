@@ -46,9 +46,10 @@ namespace Common
             Debug.Log(message);
         }
 
+        /// 目标完成时（目标内容：单次消除一整行）
         public void RegisterAchievedGoal(LevelGoal<IUnityGridSlot> achievedGoal)
         {
-            ShowMessage($"The goal {achievedGoal.GetType().Name} achieved.");
+            ShowMessage($"目标 {achievedGoal.GetType().Name} 已完成");
         }
 
         private void OnStartGameButtonClick()

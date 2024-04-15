@@ -6,12 +6,12 @@ using Match3.App.Interfaces;
 
 namespace Common
 {
+    /// 道具交换动画
     public class AnimatedItemSwapper : IItemSwapper<IUnityGridSlot>
     {
         private const float SwapDuration = 0.2f;
 
-        public async UniTask SwapItemsAsync(IUnityGridSlot gridSlot1, IUnityGridSlot gridSlot2,
-            CancellationToken cancellationToken = default)
+        public async UniTask SwapItemsAsync(IUnityGridSlot gridSlot1, IUnityGridSlot gridSlot2, CancellationToken cancellationToken = default)
         {
             var item1 = gridSlot1.Item;
             var item2 = gridSlot2.Item;

@@ -28,7 +28,7 @@ namespace Match3.Infrastructure
         /// 消除
         public SolvedData<TGridSlot> Solve(IGameBoard<TGridSlot> gameBoard, params GridPosition[] gridPositions)
         {
-            Debug.Log("消除");
+            Debug.Log("尝试消除");
 
             var resultSequences = new Collection<ItemSequence<TGridSlot>>();
             var specialItemGridSlots = new HashSet<TGridSlot>();
@@ -41,10 +41,11 @@ namespace Match3.Infrastructure
                     var sequence = dirSeqDetector.GetSequence(gameBoard, gridPosition);
                     if (sequence == null)
                     {
+                        // 不足3个时返回null
                         continue;
                     }
 
-                    if (IsNewSequence(sequence, resultSequences) == false)
+                    if (!IsNewSequence(sequence, resultSequences))
                     {
                         continue;
                     }
@@ -66,7 +67,7 @@ namespace Match3.Infrastructure
             var sequencesByType = sequences.Where(sequence => sequence.SequenceDetectorType == newSequence.SequenceDetectorType);
             var newSequenceGridSlot = newSequence.SolvedGridSlots[0];
 
-            return sequencesByType.All(sequence => sequence.SolvedGridSlots.Contains(newSequenceGridSlot) == false);
+            return sequencesByType.All(sequence => !sequence.SolvedGridSlots.Contains(newSequenceGridSlot));
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

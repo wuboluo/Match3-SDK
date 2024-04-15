@@ -98,7 +98,7 @@ public class AppContext : MonoBehaviour, IAppContext
         };
     }
 
-    private ISolvedSequencesConsumer<IUnityGridSlot>[] GetSolvedSequencesConsumers()
+    private static ISolvedSequencesConsumer<IUnityGridSlot>[] GetSolvedSequencesConsumers()
     {
         return new ISolvedSequencesConsumer<IUnityGridSlot>[]
         {

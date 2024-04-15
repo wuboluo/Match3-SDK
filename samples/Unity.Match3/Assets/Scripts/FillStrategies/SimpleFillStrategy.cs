@@ -23,7 +23,7 @@ namespace FillStrategies
 
             foreach (var solvedGridSlot in solvedData.GetUniqueSolvedGridSlots(true))
             {
-                var newItem = GetItemFromPool();
+                var newItem = FetchItemFromPool();
                 var currentItem = solvedGridSlot.Item;
 
                 newItem.SetWorldPosition(currentItem.GetWorldPosition());
@@ -32,12 +32,12 @@ namespace FillStrategies
                 itemsToHide.Add(currentItem);
                 itemsToShow.Add(newItem);
 
-                ReturnItemToPool(currentItem);
+                RecycleItemToPool(currentItem);
             }
 
             foreach (var specialItemGridSlot in solvedData.GetSpecialItemGridSlots(true))
             {
-                var item = GetItemFromPool();
+                var item = FetchItemFromPool();
                 item.SetWorldPosition(GetWorldPosition(specialItemGridSlot.GridPosition));
 
                 specialItemGridSlot.SetItem(item);

@@ -37,7 +37,7 @@ namespace FillStrategies
                         continue;
                     }
 
-                    var item = GetItemFromPool();
+                    var item = FetchItemFromPool();
                     item.SetWorldPosition(GetWorldPosition(gridSlot.GridPosition));
 
                     gridSlot.SetItem(item);
@@ -48,8 +48,7 @@ namespace FillStrategies
             return new[] { new ItemsShowJob(itemsToShow) };
         }
 
-        public abstract IEnumerable<IJob> GetSolveJobs(IGameBoard<IUnityGridSlot> gameBoard,
-            SolvedData<IUnityGridSlot> solvedData);
+        public abstract IEnumerable<IJob> GetSolveJobs(IGameBoard<IUnityGridSlot> gameBoard, SolvedData<IUnityGridSlot> solvedData);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected Vector3 GetWorldPosition(GridPosition gridPosition)
@@ -58,15 +57,15 @@ namespace FillStrategies
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        protected IUnityItem GetItemFromPool()
+        protected IUnityItem FetchItemFromPool()
         {
-            return _itemsPool.GetItem();
+            return _itemsPool.FetchItem();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        protected void ReturnItemToPool(IUnityItem item)
+        protected void RecycleItemToPool(IUnityItem item)
         {
-            _itemsPool.ReturnItem(item);
+            _itemsPool.RecycleItem(item);
         }
     }
 }

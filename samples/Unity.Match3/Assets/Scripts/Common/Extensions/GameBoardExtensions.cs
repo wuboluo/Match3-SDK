@@ -19,8 +19,7 @@ namespace Common.Extensions
             return false;
         }
 
-        public static IUnityGridSlot GetSideGridSlot(this IGameBoard<IUnityGridSlot> gameBoard, IUnityGridSlot gridSlot,
-            GridPosition direction)
+        public static IUnityGridSlot GetSideGridSlot(this IGameBoard<IUnityGridSlot> gameBoard, IUnityGridSlot gridSlot, GridPosition direction)
         {
             var sideGridSlotPosition = gridSlot.GridPosition + direction;
 

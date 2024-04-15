@@ -2,6 +2,7 @@ using System;
 using Match3.App.Interfaces;
 using Match3.Core.Interfaces;
 using Match3.Core.Structs;
+using UnityEngine;
 
 namespace Match3.App.Internal
 {
@@ -16,6 +17,7 @@ namespace Match3.App.Internal
         private bool _isStarted;
         private int _achievedGoals;
 
+        /// 目标
         private LevelGoal<TGridSlot>[] _levelGoals;
 
         protected BaseGame(GameConfig<TGridSlot> config)
@@ -90,33 +92,42 @@ namespace Match3.App.Internal
         protected abstract void OnGameStarted();
         protected abstract void OnGameStopped();
 
+        /// 是否成功消除
         protected bool IsSolved(GridPosition position1, GridPosition position2, out SolvedData<TGridSlot> solvedData)
         {
             solvedData = _gameBoardSolver.Solve(GameBoard, position1, position2);
+            
+            // 至少要有一个可被消除的序列
             return solvedData.SolvedSequences.Count > 0;
         }
 
+        /// 序列消除时
         protected void NotifySequencesSolved(SolvedData<TGridSlot> solvedData)
         {
+            // 每个序列计分
             foreach (var sequencesConsumer in _solvedSequencesConsumers)
             {
                 sequencesConsumer.OnSequencesSolved(solvedData);
             }
 
+            // 检查有没有在这次消除过后，完成的游戏目标
             foreach (var levelGoal in _levelGoals)
             {
-                if (levelGoal.IsAchieved == false)
+                // 目标未完成
+                if (!levelGoal.IsAchieved)
                 {
                     levelGoal.OnSequencesSolved(solvedData);
                 }
             }
         }
 
+        /// 所有目标均完成
         protected virtual void OnAllGoalsAchieved()
         {
             Finished?.Invoke(this, EventArgs.Empty);
         }
 
+        /// 当一次消除一整行后，完成成就
         private void OnLevelGoalAchieved(object sender, EventArgs e)
         {
             LevelGoalAchieved?.Invoke(this, (LevelGoal<TGridSlot>) sender);

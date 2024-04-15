@@ -2,7 +2,7 @@
 {
     public interface IItemsPool<TItem>
     {
-        TItem GetItem();
-        void ReturnItem(TItem item);
+        TItem FetchItem();
+        void RecycleItem(TItem item);
     }
 }

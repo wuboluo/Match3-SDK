@@ -6,6 +6,7 @@ using UnityEngine;
 
 namespace Common.LevelGoals
 {
+    /// 任务：单次消除一整行
     public class CollectRowMaxItems : LevelGoal<IUnityGridSlot>
     {
         private readonly int _maxRowLength;
@@ -15,23 +16,29 @@ namespace Common.LevelGoals
             _maxRowLength = GetMaxRowLength(gameBoard);
         }
 
+        /// 如果一次消除了一整行，就NB了
         public override void OnSequencesSolved(SolvedData<IUnityGridSlot> solvedData)
         {
+            // 所有的消除序列
             foreach (var sequence in solvedData.SolvedSequences)
             {
+                // 纵向的不算，因为这个目标就是单次消除一整行
                 if (sequence.SequenceDetectorType != typeof(HorizontalLineDetector<IUnityGridSlot>))
                 {
                     continue;
                 }
 
+                // 如果单次消除了一行最大格子数量
                 if (sequence.SolvedGridSlots.Count == _maxRowLength)
                 {
+                    // 标记此任务已完成
                     MarkAchieved();
                 }
             }
         }
 
-        private int GetMaxRowLength(IGameBoard<IUnityGridSlot> gameBoard)
+        /// 单行最多有几个可用的格子，如果中间有障碍的话，可能小于棋盘宽度
+        private static int GetMaxRowLength(IGameBoard<IUnityGridSlot> gameBoard)
         {
             var maxRowLength = 0;
 
@@ -62,7 +69,7 @@ namespace Common.LevelGoals
                     maxRowLength = maxLength;
                 }
             }
-
+            
             return maxRowLength;
         }
     }

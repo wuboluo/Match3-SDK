@@ -16,6 +16,8 @@ namespace Match3.App
         private readonly IItemSwapper<TGridSlot> _itemSwapper;
 
         private AsyncLazy _swapItemsTask;
+        
+        // 填充策略
         private IBoardFillStrategy<TGridSlot> _fillStrategy;
 
         protected Match3Game(GameConfig<TGridSlot> config) : base(config)
@@ -24,7 +26,7 @@ namespace Match3.App
             _jobsExecutor = new JobsExecutor();
         }
 
-        protected bool IsSwapItemsCompleted
+        private bool IsSwapItemsCompleted
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => _swapItemsTask == null || _swapItemsTask.Task.Status.IsCompleted();
@@ -62,8 +64,13 @@ namespace Match3.App
             RaiseGameFinishedAsync().Forget();
         }
 
-        protected UniTask SwapItemsAsync(GridPosition position1, GridPosition position2,
-            CancellationToken cancellationToken = default)
+        private async UniTask FillAsync(IBoardFillStrategy<TGridSlot> fillStrategy, CancellationToken cancellationToken = default)
+        {
+            await ExecuteJobsAsync(fillStrategy.GetFillJobs(GameBoard), cancellationToken);
+        }
+
+        /// 交换
+        protected UniTask SwapItemsAsync(GridPosition position1, GridPosition position2, CancellationToken cancellationToken = default)
         {
             if (_swapItemsTask?.Task.Status.IsCompleted() ?? true)
             {
@@ -73,30 +80,30 @@ namespace Match3.App
             return _swapItemsTask.Task;
         }
 
-        private async UniTask FillAsync(IBoardFillStrategy<TGridSlot> fillStrategy,
-            CancellationToken cancellationToken = default)
+        /// 交换
+        private async UniTask SwapItemsAsync(IBoardFillStrategy<TGridSlot> fillStrategy, GridPosition position1, GridPosition position2, CancellationToken cancellationToken = default)
         {
-            await ExecuteJobsAsync(fillStrategy.GetFillJobs(GameBoard), cancellationToken);
-        }
-
-        protected virtual async UniTask SwapItemsAsync(IBoardFillStrategy<TGridSlot> fillStrategy, GridPosition position1,
-            GridPosition position2, CancellationToken cancellationToken = default)
-        {
+            // 交换动画
             await SwapGameBoardItemsAsync(position1, position2, cancellationToken);
 
+            // 成功消除
             if (IsSolved(position1, position2, out var solvedData))
             {
+                // 序列消除时，计分等
                 NotifySequencesSolved(solvedData);
+                
+                // 执行填充策略
                 await ExecuteJobsAsync(fillStrategy.GetSolveJobs(GameBoard, solvedData), cancellationToken);
             }
             else
             {
+                // 交换失败，再换回来
                 await SwapGameBoardItemsAsync(position1, position2, cancellationToken);
             }
         }
 
-        protected async UniTask SwapGameBoardItemsAsync(GridPosition position1, GridPosition position2,
-            CancellationToken cancellationToken = default)
+        /// 播放道具交换动画
+        private async UniTask SwapGameBoardItemsAsync(GridPosition position1, GridPosition position2, CancellationToken cancellationToken = default)
         {
             var gridSlot1 = GameBoard[position1.RowIndex, position1.ColumnIndex];
             var gridSlot2 = GameBoard[position2.RowIndex, position2.ColumnIndex];
@@ -104,7 +111,7 @@ namespace Match3.App
             await _itemSwapper.SwapItemsAsync(gridSlot1, gridSlot2, cancellationToken);
         }
 
-        protected UniTask ExecuteJobsAsync(IEnumerable<IJob> jobs, CancellationToken cancellationToken = default)
+        private UniTask ExecuteJobsAsync(IEnumerable<IJob> jobs, CancellationToken cancellationToken = default)
         {
             return _jobsExecutor.ExecuteJobsAsync(jobs, cancellationToken);
         }

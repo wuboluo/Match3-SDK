@@ -11,8 +11,11 @@ namespace Match3.App
             SpecialItemGridSlots = specialItemGridSlots;
         }
 
-        public IReadOnlyCollection<TGridSlot> SpecialItemGridSlots { get; }
+        /// 消除的序列集合
         public IReadOnlyCollection<ItemSequence<TGridSlot>> SolvedSequences { get; }
+        
+        /// 被特殊消除掉的格子集合
+        public IReadOnlyCollection<TGridSlot> SpecialItemGridSlots { get; }
 
         public IEnumerable<TGridSlot> GetSolvedGridSlots(bool onlyMovable = false)
         {
@@ -20,7 +23,7 @@ namespace Match3.App
             {
                 foreach (var solvedGridSlot in sequence.SolvedGridSlots)
                 {
-                    if (onlyMovable && solvedGridSlot.IsMovable == false)
+                    if (onlyMovable && !solvedGridSlot.IsMovable)
                     {
                         continue;
                     }

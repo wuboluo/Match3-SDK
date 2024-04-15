@@ -17,8 +17,7 @@ namespace FillStrategies
 
         public override string Name => "Fall Down Fill Strategy";
 
-        public override IEnumerable<IJob> GetSolveJobs(IGameBoard<IUnityGridSlot> gameBoard,
-            SolvedData<IUnityGridSlot> solvedData)
+        public override IEnumerable<IJob> GetSolveJobs(IGameBoard<IUnityGridSlot> gameBoard, SolvedData<IUnityGridSlot> solvedData)
         {
             var jobs = new List<IJob>();
             var itemsToHide = new List<IUnityItem>();
@@ -31,7 +30,7 @@ namespace FillStrategies
                     continue;
                 }
 
-                if (solvedGridSlots.Add(solvedGridSlot) == false)
+                if (!solvedGridSlots.Add(solvedGridSlot))
                 {
                     continue;
                 }
@@ -40,7 +39,7 @@ namespace FillStrategies
                 itemsToHide.Add(currentItem);
                 solvedGridSlot.Clear();
 
-                ReturnItemToPool(currentItem);
+                RecycleItemToPool(currentItem);
             }
 
             foreach (var specialItemGridSlot in solvedData.GetSpecialItemGridSlots())
@@ -108,7 +107,7 @@ namespace FillStrategies
                         continue;
                     }
 
-                    var item = GetItemFromPool();
+                    var item = FetchItemFromPool();
                     var itemGeneratorPosition = GetItemGeneratorPosition(gameBoard, rowIndex, columnIndex);
                     item.SetWorldPosition(GetWorldPosition(itemGeneratorPosition));
 

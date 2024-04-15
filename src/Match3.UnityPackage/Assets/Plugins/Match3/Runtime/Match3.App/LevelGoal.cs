@@ -4,14 +4,19 @@ using Match3.Core.Interfaces;
 
 namespace Match3.App
 {
+    /// 游戏目标
     public abstract class LevelGoal<TGridSlot> : ISolvedSequencesConsumer<TGridSlot> where TGridSlot : IGridSlot
     {
+        /// 是否完成
         public bool IsAchieved { get; private set; }
 
+        /// 完成时
         public event EventHandler Achieved;
 
+        /// 序列消除时（可能消除后就完成了某个目标）
         public abstract void OnSequencesSolved(SolvedData<TGridSlot> solvedData);
 
+        /// 标记为已完成
         protected void MarkAchieved()
         {
             IsAchieved = true;

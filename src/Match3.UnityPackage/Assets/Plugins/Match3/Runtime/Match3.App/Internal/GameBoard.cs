@@ -9,13 +9,10 @@ namespace Match3.App.Internal
 {
     internal class GameBoard<TGridSlot> : IGameBoard<TGridSlot>, IDisposable where TGridSlot : IGridSlot
     {
-        private int _rowCount;
-        private int _columnCount;
-
         private TGridSlot[,] _gridSlots;
 
-        public int RowCount => _rowCount;
-        public int ColumnCount => _columnCount;
+        public int RowCount { get; private set; }
+        public int ColumnCount { get; private set; }
 
         public TGridSlot this[GridPosition gridPosition] => _gridSlots[gridPosition.RowIndex, gridPosition.ColumnIndex];
         public TGridSlot this[int rowIndex, int columnIndex] => _gridSlots[rowIndex, columnIndex];
@@ -27,8 +24,9 @@ namespace Match3.App.Internal
                 throw new InvalidOperationException("Grid slots have already been created.");
             }
 
-            _rowCount = gridSlots.GetLength(0);
-            _columnCount = gridSlots.GetLength(1);
+            RowCount = gridSlots.GetLength(0);
+            ColumnCount = gridSlots.GetLength(1);
+
             _gridSlots = gridSlots;
         }
 
@@ -46,8 +44,8 @@ namespace Match3.App.Internal
 
         public void ResetState()
         {
-            _rowCount = 0;
-            _columnCount = 0;
+            RowCount = 0;
+            ColumnCount = 0;
             _gridSlots = null;
         }
 

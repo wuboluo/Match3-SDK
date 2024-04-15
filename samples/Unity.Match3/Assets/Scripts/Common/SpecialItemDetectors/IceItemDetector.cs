@@ -9,7 +9,7 @@ namespace Common.SpecialItemDetectors
     {
         public IEnumerable<IUnityGridSlot> GetSpecialItemGridSlots(IGameBoard<IUnityGridSlot> gameBoard, IUnityGridSlot gridSlot)
         {
-            if (gridSlot.State.TypeId == (int) TileType.Ice)
+            if (gridSlot.State.TypeId == (int)TileType.Ice)
             {
                 yield return gridSlot;
             }

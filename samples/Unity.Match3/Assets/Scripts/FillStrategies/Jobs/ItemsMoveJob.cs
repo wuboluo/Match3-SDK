@@ -14,8 +14,7 @@ namespace FillStrategies.Jobs
         private readonly float _delay;
         private readonly IEnumerable<ItemMoveData> _itemsData;
 
-        public ItemsMoveJob(IEnumerable<ItemMoveData> items, int delayMultiplier = 0, int executionOrder = 0)
-            : base(executionOrder)
+        public ItemsMoveJob(IEnumerable<ItemMoveData> items, int delayMultiplier = 0, int executionOrder = 0) : base(executionOrder)
         {
             _itemsData = items;
             _delay = delayMultiplier * DelayDuration;

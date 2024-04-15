@@ -57,26 +57,28 @@ namespace Common
             return GetTileType(gridPosition) != TileType.Unavailable;
         }
 
-        public bool IsPointerOnGrid(Vector3 worldPointerPosition, out GridPosition gridPosition)
-        {
-            gridPosition = GetGridPositionByPointer(worldPointerPosition);
-            return IsPositionOnGrid(gridPosition);
-        }
-
-        public bool IsPositionOnGrid(GridPosition gridPosition)
-        {
-            return GridMath.IsPositionOnGrid(gridPosition, _rowCount, _columnCount);
-        }
-
+        /// 鼠标位置是否在棋盘内，如果在就返回所在的格子位置
         public bool IsPointerOnBoard(Vector3 worldPointerPosition, out GridPosition gridPosition)
         {
             gridPosition = GetGridPositionByPointer(worldPointerPosition);
             return IsPositionOnBoard(gridPosition);
         }
 
+        public bool IsPointerOnGrid(Vector3 worldPointerPosition, out GridPosition gridPosition)
+        {
+            gridPosition = GetGridPositionByPointer(worldPointerPosition);
+            return IsPositionOnGrid(gridPosition);
+        }
+        
+        /// 该位置在棋盘内且该位置的棋子已启用
         private bool IsPositionOnBoard(GridPosition gridPosition)
         {
             return IsPositionOnGrid(gridPosition) && IsTileActive(gridPosition);
+        }
+
+        public bool IsPositionOnGrid(GridPosition gridPosition)
+        {
+            return GridMath.IsPositionOnGrid(gridPosition, _rowCount, _columnCount);
         }
 
         /// 通过鼠标位置获取格子行列位置

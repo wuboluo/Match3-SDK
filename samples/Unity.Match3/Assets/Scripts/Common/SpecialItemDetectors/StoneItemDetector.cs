@@ -8,21 +8,15 @@ namespace Common.SpecialItemDetectors
 {
     public class StoneItemDetector : ISpecialItemDetector<IUnityGridSlot>
     {
-        private readonly GridPosition[] _lookupDirections;
-
-        public StoneItemDetector()
+        private readonly GridPosition[] _lookupDirections =
         {
-            _lookupDirections = new[]
-            {
-                GridPosition.Up,
-                GridPosition.Down,
-                GridPosition.Left,
-                GridPosition.Right
-            };
-        }
+            GridPosition.Up,
+            GridPosition.Down,
+            GridPosition.Left,
+            GridPosition.Right
+        };
 
-        public IEnumerable<IUnityGridSlot> GetSpecialItemGridSlots(IGameBoard<IUnityGridSlot> gameBoard,
-            IUnityGridSlot gridSlot)
+        public IEnumerable<IUnityGridSlot> GetSpecialItemGridSlots(IGameBoard<IUnityGridSlot> gameBoard, IUnityGridSlot gridSlot)
         {
             if (gridSlot.IsMovable == false)
             {
@@ -38,7 +32,7 @@ namespace Common.SpecialItemDetectors
                 }
 
                 var lookupGridSlot = gameBoard[lookupPosition];
-                if (lookupGridSlot.State.TypeId == (int) TileType.Stone)
+                if (lookupGridSlot.State.TypeId == (int)TileType.Stone)
                 {
                     yield return lookupGridSlot;
                 }

@@ -23,12 +23,12 @@ namespace Match3.Infrastructure
             }
         }
 
-        public TItem GetItem()
+        public TItem FetchItem()
         {
             return ConfigureItem(_itemsPool.Dequeue());
         }
 
-        public void ReturnItem(TItem item)
+        public void RecycleItem(TItem item)
         {
             _itemsPool.Enqueue(item);
         }

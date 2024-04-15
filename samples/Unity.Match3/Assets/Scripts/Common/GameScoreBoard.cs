@@ -9,6 +9,7 @@ namespace Common
     /// 游戏计分板
     public class GameScoreBoard : ISolvedSequencesConsumer<IUnityGridSlot>
     {
+        /// 当序列被消除时
         public void OnSequencesSolved(SolvedData<IUnityGridSlot> solvedData)
         {
             foreach (var sequence in solvedData.SolvedSequences)
@@ -17,9 +18,9 @@ namespace Common
             }
         }
 
-        /// 注册序列分数
         private static void RegisterSequenceScore(ItemSequence<IUnityGridSlot> sequence)
         {
+            // todo：combo 计分 出兵 
             Debug.Log(GetSequenceDescription(sequence));
         }
 

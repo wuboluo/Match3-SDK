@@ -16,8 +16,7 @@ namespace Common
         private bool _isDragMode;
         private GridPosition _slotDownPosition;
 
-        public UnityGame(IInputSystem inputSystem, IUnityGameBoardRenderer gameBoardRenderer,
-            GameConfig<IUnityGridSlot> config) : base(config)
+        public UnityGame(IInputSystem inputSystem, IUnityGameBoardRenderer gameBoardRenderer, GameConfig<IUnityGridSlot> config) : base(config)
         {
             _inputSystem = inputSystem;
             _gameBoardRenderer = gameBoardRenderer;
@@ -48,6 +47,7 @@ namespace Common
 
         private void OnPointerDown(object sender, PointerEventArgs pointer)
         {
+            // 鼠标落在的位置的格子是否可移动
             if (IsPointerOnBoard(pointer.WorldPosition, out _slotDownPosition) && IsMovableSlot(_slotDownPosition))
             {
                 _isDragMode = true;
@@ -61,39 +61,48 @@ namespace Common
                 return;
             }
 
-            if (IsPointerOnBoard(pointer.WorldPosition, out var slotPosition) == false ||
-                IsMovableSlot(slotPosition) == false)
+            // 出界了 or 该棋子不可移动
+            if (!IsPointerOnBoard(pointer.WorldPosition, out var slotPosition) || !IsMovableSlot(slotPosition))
             {
                 _isDragMode = false;
                 return;
             }
 
+            // 是同一个格子 or 不在一条直线上
             if (IsSameSlot(slotPosition) || IsDiagonalSlot(slotPosition))
             {
                 return;
             }
 
             _isDragMode = false;
+            
+            // 鼠标落下的位置和当前位置交换
+            // todo 是不是要在up的时候交换
             SwapItemsAsync(_slotDownPosition, slotPosition).Forget();
         }
 
+        /// 在棋盘内
         private bool IsPointerOnBoard(Vector3 pointerWorldPosition, out GridPosition slotDownPosition)
         {
             return _gameBoardRenderer.IsPointerOnBoard(pointerWorldPosition, out slotDownPosition);
         }
 
+        /// 可被交换的
         private bool IsMovableSlot(GridPosition gridPosition)
         {
             return GameBoard[gridPosition].IsMovable;
         }
 
+        /// 同一个
         private bool IsSameSlot(GridPosition slotPosition)
         {
             return _slotDownPosition.Equals(slotPosition);
         }
 
+        /// 不在一条直线上
         private bool IsDiagonalSlot(GridPosition slotPosition)
         {
+            // 当前的格子和鼠标落下时的格子在上下左右任意方向是挨着的
             var isSideSlot = slotPosition.Equals(_slotDownPosition + GridPosition.Up) ||
                              slotPosition.Equals(_slotDownPosition + GridPosition.Down) ||
                              slotPosition.Equals(_slotDownPosition + GridPosition.Left) ||
