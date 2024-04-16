@@ -33,7 +33,8 @@ namespace Match3
 
         public bool IsPositionOnBoard(GridPosition gridPosition)
         {
-            return IsPositionOnGrid(gridPosition) && _gridSlots[gridPosition.RowIndex, gridPosition.ColumnIndex].CanContainItem;
+            return IsPositionOnGrid(gridPosition) 
+                   && _gridSlots[gridPosition.RowIndex, gridPosition.ColumnIndex].CanContainItem;
         }
 
         public void ResetState()
@@ -45,7 +46,10 @@ namespace Match3
 
         public void Dispose()
         {
-            if (_gridSlots == null) return;
+            if (_gridSlots == null)
+            {
+                return;
+            }
 
             Array.Clear(_gridSlots, 0, _gridSlots.Length);
             ResetState();
@@ -54,7 +58,10 @@ namespace Match3
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void EnsureGridSlotsIsNotNull()
         {
-            if (_gridSlots == null) throw new InvalidOperationException("Grid slots are not created.");
+            if (_gridSlots == null)
+            {
+                throw new InvalidOperationException("Grid slots are not created.");
+            }
         }
     }
 }

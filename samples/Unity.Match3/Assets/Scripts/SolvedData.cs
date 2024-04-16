@@ -21,7 +21,10 @@ namespace Match3
             foreach (var sequence in SolvedSequences)
             foreach (var solvedGridSlot in sequence.SolvedGridSlots)
             {
-                if (onlyMovable && !solvedGridSlot.IsMovable) continue;
+                if (onlyMovable && !solvedGridSlot.IsMovable)
+                {
+                    continue;
+                }
 
                 yield return solvedGridSlot;
             }
@@ -31,7 +34,10 @@ namespace Match3
         {
             foreach (var specialItemGridSlot in SpecialItemGridSlots)
             {
-                if (excludeOccupied && specialItemGridSlot.HasItem) continue;
+                if (excludeOccupied && specialItemGridSlot.HasItem)
+                {
+                    continue;
+                }
 
                 yield return specialItemGridSlot;
             }

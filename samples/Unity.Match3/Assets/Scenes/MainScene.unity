@@ -415,7 +415,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9477e7cdf3d244338c3fad573219ea2a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  boardData: {fileID: 1984867024}
+  data: {fileID: 1984867024}
   inputSystem: {fileID: 79761311}
 --- !u!4 &1397966487
 Transform:

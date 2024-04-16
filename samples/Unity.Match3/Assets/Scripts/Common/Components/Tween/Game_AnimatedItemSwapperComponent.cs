@@ -5,7 +5,7 @@ using DG.Tweening;
 namespace Match3
 {
     /// 道具交换动画
-    public class AnimatedItemSwapper
+    public class Game_AnimatedItemSwapperComponent : Component
     {
         private const float SwapDuration = 0.2f;
 

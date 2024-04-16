@@ -4,20 +4,20 @@ using UnityEngine;
 
 namespace Match3
 {
-    /// 同列上升填充
-    public class RiseFillStrategy
+    /// 同列上升填充策略组件
+    public class Game_RiseFillStrategyComponent : Component
     {
         private readonly Game_ItemGenerateComponent _itemGenerateComponent;
-        private readonly Game_BoardRenderComponent _boardRenderComponent;
+        private readonly Game_BoardComponent _boardComponent;
 
         private readonly UnityGridSlot[,] _gridSlots;
 
-        public RiseFillStrategy()
+        public Game_RiseFillStrategyComponent()
         {
             _itemGenerateComponent = World.Instance.Root.GetComponent<Game_ItemGenerateComponent>();
-            _boardRenderComponent = World.Instance.Root.GetComponent<Game_BoardRenderComponent>();
+            _boardComponent = World.Instance.Root.GetComponent<Game_BoardComponent>();
 
-            _gridSlots = _boardRenderComponent.GetGridSlots();
+            _gridSlots = _boardComponent.GetGridSlots();
         }
 
         /// 棋盘填充Jobs
@@ -183,7 +183,7 @@ namespace Match3
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private Vector3 GetWorldPosition(GridPosition gridPosition)
         {
-            return _boardRenderComponent.GetWorldPosition(gridPosition);
+            return _boardComponent.GetWorldPosition(gridPosition);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

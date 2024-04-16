@@ -6,8 +6,8 @@ using UnityEngine;
 
 namespace Match3
 {
-    /// 游戏消除器
-    public class GameBoardSolver
+    //// 游戏消除组件
+    public class Game_SolveComponent : Component
     {
         // 方向序列检测器
         private readonly ILineDetect[] _dirSequenceDetectors;
@@ -15,14 +15,14 @@ namespace Match3
         // 特殊道具检测器
         private readonly ISpecialItemDetector[] _specialItemDetectors;
 
-        public GameBoardSolver(ILineDetect[] dirSequenceDetectors, ISpecialItemDetector[] specialItemDetectors)
+        public Game_SolveComponent(ILineDetect[] dirSequenceDetectors, ISpecialItemDetector[] specialItemDetectors)
         {
             _dirSequenceDetectors = dirSequenceDetectors;
             _specialItemDetectors = specialItemDetectors;
         }
 
         /// 消除
-        public SolvedData Solve(GameBoard gameBoard, params GridPosition[] gridPositions)
+        public SolvedData Swap(GameBoard gameBoard, params GridPosition[] gridPositions)
         {
             Debug.Log("交换");
 
@@ -30,23 +30,35 @@ namespace Match3
             var specialItemGridSlots = new HashSet<UnityGridSlot>();
 
             foreach (var gridPosition in gridPositions)
-                // 横向 纵向
-            foreach (var dirSeqDetector in _dirSequenceDetectors)
             {
-                var sequence = dirSeqDetector.GetSequence(gameBoard, gridPosition);
-                if (sequence == null)
-                    // 不足3个时返回null
-                    continue;
+                // 横向 纵向
+                foreach (var dirSeqDetector in _dirSequenceDetectors)
+                {
+                    var sequence = dirSeqDetector.GetSequence(gameBoard, gridPosition);
+                    if (sequence == null)
+                    {
+                        // 不足3个时返回null
+                        continue;
+                    }
 
-                if (!IsNewSequence(sequence, resultSequences)) continue;
+                    if (!IsNewSequence(sequence, resultSequences))
+                    {
+                        continue;
+                    }
 
-                // todo 
-                if (_specialItemDetectors != null)
-                    foreach (var specialItemGridSlot in GetSpecialItemGridSlots(gameBoard, sequence))
-                        specialItemGridSlots.Add(specialItemGridSlot);
+                    // todo 
+                    if (_specialItemDetectors != null)
+                    {
+                        foreach (var specialItemGridSlot in GetSpecialItemGridSlots(gameBoard, sequence))
+                        {
+                            specialItemGridSlots.Add(specialItemGridSlot);
+                        }
+                    }
 
-                resultSequences.Add(sequence);
+                    resultSequences.Add(sequence);
+                }
             }
+
 
             return new SolvedData(resultSequences, specialItemGridSlots);
         }

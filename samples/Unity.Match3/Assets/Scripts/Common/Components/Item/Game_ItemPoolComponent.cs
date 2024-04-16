@@ -6,15 +6,15 @@ namespace Match3
     public class Game_ItemPoolComponent : Component
     {
         // tile gameObject 父节点
-        private Transform _itemsParent;
+        private readonly Transform _itemsParent;
 
         // 每种tile的池
-        private Dictionary<TileType, Queue<IGridTile>> _itemsPool;
+        private readonly Dictionary<TileType, Queue<IGridTile>> _itemsPool;
 
         // 每种tile的prefab
-        private Dictionary<TileType, GameObject> _tilePrefabs;
+        private readonly Dictionary<TileType, GameObject> _tilePrefabs;
 
-        public void Init(TileModel[] tiles, Transform itemsParent)
+        public Game_ItemPoolComponent(TileModel[] tiles, Transform itemsParent)
         {
             _itemsParent = itemsParent;
             _itemsPool = new Dictionary<TileType, Queue<IGridTile>>(tiles.Length);
