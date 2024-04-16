@@ -1,71 +1,64 @@
 using System;
-using Common.Interfaces;
-using Common.Models;
-using Match3.App.Interfaces;
-using Match3.Infrastructure.Interfaces;
 using UnityEngine;
 
-namespace Common.GameModes
+public class GameInitMode
 {
-    public class GameInitMode : IGameMode, IDisposable
+    private readonly AppContext _appContext;
+    private readonly GameUiCanvas _gameUiCanvas;
+    private readonly IconsSetModel[] _iconSets;
+    private readonly UnityItemGenerator _itemGenerator;
+    private readonly UnityGame _unityGame;
+
+    private bool _isInitialized;
+
+    public GameInitMode(AppContext appContext)
     {
-        private readonly UnityGame _unityGame;
-        private readonly IAppContext _appContext;
-        private readonly IconsSetModel[] _iconSets;
-        private readonly IGameUiCanvas _gameUiCanvas;
-        private readonly IUnityItemGenerator _itemGenerator;
+        _appContext = appContext;
+        _unityGame = appContext.Resolve<UnityGame>();
+        _iconSets = appContext.Resolve<IconsSetModel[]>();
+        _gameUiCanvas = appContext.Resolve<GameUiCanvas>();
+        _itemGenerator = appContext.Resolve<UnityItemGenerator>();
+    }
 
-        private bool _isInitialized;
+    public void Dispose()
+    {
+        _unityGame.Dispose();
+        _itemGenerator.Dispose();
+    }
 
-        public GameInitMode(IAppContext appContext)
+    public event EventHandler Finished;
+
+    public void Activate()
+    {
+        const int level = 0;
+
+        if (_isInitialized)
         {
-            _appContext = appContext;
-            _unityGame = appContext.Resolve<UnityGame>();
-            _iconSets = appContext.Resolve<IconsSetModel[]>();
-            _gameUiCanvas = appContext.Resolve<IGameUiCanvas>();
-            _itemGenerator = appContext.Resolve<IUnityItemGenerator>();
+            SetLevel(level);
+        }
+        else
+        {
+            Init(level);
+            SetLevel(level);
         }
 
-        public event EventHandler Finished;
+        Finished?.Invoke(this, EventArgs.Empty);
+    }
 
-        public void Activate()
-        {
-            const int level = 0;
+    private void Init(int level)
+    {
+        var gameBoardData = _appContext.Resolve<UnityGameBoardRenderer>().GetGridSlots(level);
+        var rowCount = gameBoardData.GetLength(0);
+        var columnCount = gameBoardData.GetLength(1);
+        var itemsPoolCapacity = rowCount * columnCount + Mathf.Max(rowCount, columnCount) * 2;
 
-            if (_isInitialized)
-            {
-                SetLevel(level);
-            }
-            else
-            {
-                Init(level);
-                SetLevel(level);
-            }
+        _itemGenerator.CreateItems(itemsPoolCapacity);
+        _isInitialized = true;
+    }
 
-            Finished?.Invoke(this, EventArgs.Empty);
-        }
-
-        public void Dispose()
-        {
-            _unityGame.Dispose();
-            _itemGenerator.Dispose();
-        }
-
-        private void Init(int level)
-        {
-            var gameBoardData = _appContext.Resolve<IGameBoardDataProvider<IUnityGridSlot>>().GetGridSlots(level);
-            var rowCount = gameBoardData.GetLength(0);
-            var columnCount = gameBoardData.GetLength(1);
-            var itemsPoolCapacity = rowCount * columnCount + Mathf.Max(rowCount, columnCount) * 2;
-
-            _itemGenerator.CreateItems(itemsPoolCapacity);
-            _isInitialized = true;
-        }
-
-        private void SetLevel(int level)
-        {
-            _unityGame.InitGameLevel(level);
-            _itemGenerator.SetSprites(_iconSets[_gameUiCanvas.SelectedIconsSetIndex].Sprites);
-        }
+    private void SetLevel(int level)
+    {
+        _unityGame.InitGameLevel(level);
+        _itemGenerator.SetSprites(_iconSets[_gameUiCanvas.SelectedIconsSetIndex].Sprites);
     }
 }

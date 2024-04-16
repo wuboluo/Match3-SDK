@@ -1,143 +1,117 @@
 using System;
-using Common.Interfaces;
-using Common.Models;
-using Match3.Core.Structs;
-using Match3.Infrastructure.Interfaces;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-namespace Common.GameModes
+public class DrawGameBoardMode
 {
-    public class DrawGameBoardMode : IGameMode, IDeactivatable
+    private readonly UnityGameBoardRenderer _gameBoardRenderer;
+    private readonly GameUiCanvas _gameUiCanvas;
+    private readonly CanvasInputSystem _inputSystem;
+
+    private bool _isDrawMode;
+    private bool _isInitialized;
+    private GridPosition _previousSlotPosition;
+
+    public DrawGameBoardMode(AppContext appContext)
     {
-        private readonly IInputSystem _inputSystem;
-        private readonly IGameUiCanvas _gameUiCanvas;
-        private readonly IUnityGameBoardRenderer _gameBoardRenderer;
+        _inputSystem = appContext.Resolve<CanvasInputSystem>();
+        _gameUiCanvas = appContext.Resolve<GameUiCanvas>();
+        _gameBoardRenderer = appContext.Resolve<UnityGameBoardRenderer>();
+    }
 
-        private bool _isDrawMode;
-        private bool _isInitialized;
-        private GridPosition _previousSlotPosition;
+    public void Deactivate()
+    {
+        _inputSystem.PointerDown -= OnPointerDown;
+        _inputSystem.PointerDrag -= OnPointerDrag;
+        _inputSystem.PointerUp -= OnPointerUp;
+        _gameUiCanvas.StartGameClick -= OnStartGameClick;
+    }
 
-        public DrawGameBoardMode(IAppContext appContext)
+    public event EventHandler Finished;
+
+    public void Activate()
+    {
+        if (!_isInitialized)
         {
-            _inputSystem = appContext.Resolve<IInputSystem>();
-            _gameUiCanvas = appContext.Resolve<IGameUiCanvas>();
-            _gameBoardRenderer = appContext.Resolve<IUnityGameBoardRenderer>();
+            _isInitialized = true;
+            _gameBoardRenderer.CreateGridTiles(null);
         }
 
-        public event EventHandler Finished;
+        // _inputSystem.PointerDown += OnPointerDown;
+        // _inputSystem.PointerDrag += OnPointerDrag;
+        // _inputSystem.PointerUp += OnPointerUp;
+        // _gameUiCanvas.StartGameClick += OnStartGameClick;
+    }
 
-        public void Activate()
+    private void OnPointerDown(object sender, PointerEventArgs pointer)
+    {
+        if (IsPointerOnGrid(pointer.WorldPosition, out var gridPosition) == false) return;
+
+        if (IsLeftButton(pointer))
         {
-            if (_isInitialized == false)
-            {
-                _isInitialized = true;
-                _gameBoardRenderer.CreateGridTiles(null);
-            }
+            _isDrawMode = true;
+            _previousSlotPosition = gridPosition;
 
-            _inputSystem.PointerDown += OnPointerDown;
-            _inputSystem.PointerDrag += OnPointerDrag;
-            _inputSystem.PointerUp += OnPointerUp;
-            _gameUiCanvas.StartGameClick += OnStartGameClick;
+            InvertGridTileState(gridPosition);
         }
-
-        public void Deactivate()
+        else if (IsRightButton(pointer))
         {
-            _inputSystem.PointerDown -= OnPointerDown;
-            _inputSystem.PointerDrag -= OnPointerDrag;
-            _inputSystem.PointerUp -= OnPointerUp;
-            _gameUiCanvas.StartGameClick -= OnStartGameClick;
+            SetNextGridTileGroup(gridPosition);
         }
+    }
 
-        private void OnPointerDown(object sender, PointerEventArgs pointer)
-        {
-            if (IsPointerOnGrid(pointer.WorldPosition, out var gridPosition) == false)
-            {
-                return;
-            }
+    private void OnPointerDrag(object sender, PointerEventArgs pointer)
+    {
+        if (_isDrawMode == false) return;
 
-            if (IsLeftButton(pointer))
-            {
-                _isDrawMode = true;
-                _previousSlotPosition = gridPosition;
+        if (IsPointerOnGrid(pointer.WorldPosition, out var slotPosition) == false) return;
 
-                InvertGridTileState(gridPosition);
-            }
-            else if (IsRightButton(pointer))
-            {
-                SetNextGridTileGroup(gridPosition);
-            }
-        }
+        if (IsSameSlot(slotPosition)) return;
 
-        private void OnPointerDrag(object sender, PointerEventArgs pointer)
-        {
-            if (_isDrawMode == false)
-            {
-                return;
-            }
+        _previousSlotPosition = slotPosition;
+        InvertGridTileState(slotPosition);
+    }
 
-            if (IsPointerOnGrid(pointer.WorldPosition, out var slotPosition) == false)
-            {
-                return;
-            }
+    private void OnPointerUp(object sender, PointerEventArgs pointer)
+    {
+        _isDrawMode = false;
+    }
 
-            if (IsSameSlot(slotPosition))
-            {
-                return;
-            }
+    private void OnStartGameClick(object sender, EventArgs e)
+    {
+        Finished?.Invoke(this, EventArgs.Empty);
+    }
 
-            _previousSlotPosition = slotPosition;
-            InvertGridTileState(slotPosition);
-        }
+    private bool IsLeftButton(PointerEventArgs pointer)
+    {
+        return pointer.Button == PointerEventData.InputButton.Left;
+    }
 
-        private void OnPointerUp(object sender, PointerEventArgs pointer)
-        {
-            _isDrawMode = false;
-        }
+    private bool IsRightButton(PointerEventArgs pointer)
+    {
+        return pointer.Button == PointerEventData.InputButton.Right;
+    }
 
-        private void OnStartGameClick(object sender, EventArgs e)
-        {
-            Finished?.Invoke(this, EventArgs.Empty);
-        }
+    private bool IsPointerOnGrid(Vector3 worldPosition, out GridPosition gridPosition)
+    {
+        return _gameBoardRenderer.IsPointerOnGrid(worldPosition, out gridPosition);
+    }
 
-        private bool IsLeftButton(PointerEventArgs pointer)
-        {
-            return pointer.Button == PointerEventData.InputButton.Left;
-        }
+    private bool IsSameSlot(GridPosition slotPosition)
+    {
+        return _previousSlotPosition.Equals(slotPosition);
+    }
 
-        private bool IsRightButton(PointerEventArgs pointer)
-        {
-            return pointer.Button == PointerEventData.InputButton.Right;
-        }
+    private void InvertGridTileState(GridPosition gridPosition)
+    {
+        if (_gameBoardRenderer.IsTileActive(gridPosition))
+            _gameBoardRenderer.DeactivateTile(gridPosition);
+        else
+            _gameBoardRenderer.ActivateTile(gridPosition);
+    }
 
-        private bool IsPointerOnGrid(Vector3 worldPosition, out GridPosition gridPosition)
-        {
-            return _gameBoardRenderer.IsPointerOnGrid(worldPosition, out gridPosition);
-        }
-
-        private bool IsSameSlot(GridPosition slotPosition)
-        {
-            return _previousSlotPosition.Equals(slotPosition);
-        }
-
-        private void InvertGridTileState(GridPosition gridPosition)
-        {
-            if (_gameBoardRenderer.IsTileActive(gridPosition))
-            {
-                _gameBoardRenderer.DeactivateTile(gridPosition);
-            }
-            else
-            {
-                _gameBoardRenderer.ActivateTile(gridPosition);
-            }
-        }
-
-        private void SetNextGridTileGroup(GridPosition gridPosition)
-        {
-            if (_gameBoardRenderer.IsTileActive(gridPosition))
-            {
-                _gameBoardRenderer.SetNextGridTileType(gridPosition);
-            }
-        }
+    private void SetNextGridTileGroup(GridPosition gridPosition)
+    {
+        if (_gameBoardRenderer.IsTileActive(gridPosition)) _gameBoardRenderer.SetNextGridTileType(gridPosition);
     }
 }

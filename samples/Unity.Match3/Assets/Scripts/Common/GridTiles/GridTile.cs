@@ -1,37 +1,30 @@
-using Common.Interfaces;
 using UnityEngine;
 
-namespace Common.GridTiles
+public abstract class GridTile : MonoBehaviour, IGridTile
 {
-    public abstract class GridTile : MonoBehaviour, IGridTile
+    private bool _isDestroyed;
+
+    private void OnDestroy()
     {
-        private bool _isDestroyed;
+        _isDestroyed = true;
+    }
 
-        public abstract int TypeId { get; }
-        public abstract bool IsLocked { get; }
-        public abstract bool CanContainItem { get; }
+    public abstract int TypeId { get; }
+    public abstract bool IsLocked { get; }
+    public abstract bool CanContainItem { get; }
 
-        public void SetActive(bool value)
-        {
-            gameObject.SetActive(value);
-        }
+    public void SetActive(bool value)
+    {
+        gameObject.SetActive(value);
+    }
 
-        public void SetWorldPosition(Vector3 worldPosition)
-        {
-            transform.position = worldPosition;
-        }
+    public void SetWorldPosition(Vector3 worldPosition)
+    {
+        transform.position = worldPosition;
+    }
 
-        private void OnDestroy()
-        {
-            _isDestroyed = true;
-        }
-
-        public void Dispose()
-        {
-            if (_isDestroyed == false)
-            {
-                Destroy(gameObject);
-            }
-        }
+    public void Dispose()
+    {
+        if (_isDestroyed == false) Destroy(gameObject);
     }
 }

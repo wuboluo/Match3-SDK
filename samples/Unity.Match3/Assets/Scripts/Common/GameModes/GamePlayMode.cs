@@ -1,72 +1,65 @@
 using System;
-using Common.Interfaces;
 using Cysharp.Threading.Tasks;
-using Match3.App;
-using Match3.App.Interfaces;
-using Match3.Infrastructure.Interfaces;
 
-namespace Common.GameModes
+public class GamePlayMode
 {
-    public class GamePlayMode : IGameMode, IDeactivatable
+    private readonly GameUiCanvas _gameUiCanvas;
+    private readonly RiseFillStrategy _riseFillStrategy;
+    private readonly UnityGame _unityGame;
+
+    public GamePlayMode(AppContext appContext)
     {
-        private readonly UnityGame _unityGame;
-        private readonly IGameUiCanvas _gameUiCanvas;
-        private readonly IBoardFillStrategy<IUnityGridSlot>[] _boardFillStrategies;
+        _unityGame = appContext.Resolve<UnityGame>();
+        _gameUiCanvas = appContext.Resolve<GameUiCanvas>();
+        _riseFillStrategy = appContext.Resolve<RiseFillStrategy>();
+    }
 
-        public GamePlayMode(IAppContext appContext)
-        {
-            _unityGame = appContext.Resolve<UnityGame>();
-            _gameUiCanvas = appContext.Resolve<IGameUiCanvas>();
-            _boardFillStrategies = appContext.Resolve<IBoardFillStrategy<IUnityGridSlot>[]>();
-        }
+    public void Deactivate()
+    {
+        _unityGame.LevelGoalAchieved -= OnLevelGoalAchieved;
+        _gameUiCanvas.StrategyChanged -= OnStrategyChanged;
 
-        public event EventHandler Finished
-        {
-            add => _unityGame.Finished += value;
-            remove => _unityGame.Finished -= value;
-        }
+        _unityGame.StopAsync().Forget();
+        _gameUiCanvas.ShowMessage("Game finished.");
+    }
 
-        public void Activate()
-        {
-            _unityGame.LevelGoalAchieved += OnLevelGoalAchieved;
-            _gameUiCanvas.StrategyChanged += OnStrategyChanged;
+    public event EventHandler Finished
+    {
+        add => _unityGame.Finished += value;
+        remove => _unityGame.Finished -= value;
+    }
 
-            // 设置填充策略
-            _unityGame.SetGameBoardFillStrategy(GetSelectedFillStrategy());
-            // 开始游戏 生成格子
-            _unityGame.StartAsync().Forget();
+    public void Activate()
+    {
+        _unityGame.LevelGoalAchieved += OnLevelGoalAchieved;
+        _gameUiCanvas.StrategyChanged += OnStrategyChanged;
 
-            _gameUiCanvas.ShowMessage("Game started.");
-        }
+        // 设置填充策略
+        _unityGame.SetGameBoardFillStrategy(GetSelectedFillStrategy());
+        // 开始游戏 生成格子
+        _unityGame.StartAsync().Forget();
 
-        public void Deactivate()
-        {
-            _unityGame.LevelGoalAchieved -= OnLevelGoalAchieved;
-            _gameUiCanvas.StrategyChanged -= OnStrategyChanged;
+        _gameUiCanvas.ShowMessage("Game started.");
+    }
 
-            _unityGame.StopAsync().Forget();
-            _gameUiCanvas.ShowMessage("Game finished.");
-        }
+    private void OnLevelGoalAchieved(object sender, LevelGoal levelGoal)
+    {
+        _gameUiCanvas.RegisterAchievedGoal(levelGoal);
+    }
 
-        private void OnLevelGoalAchieved(object sender, LevelGoal<IUnityGridSlot> levelGoal)
-        {
-            _gameUiCanvas.RegisterAchievedGoal(levelGoal);
-        }
+    private void OnStrategyChanged(object sender, int index)
+    {
+        _unityGame.SetGameBoardFillStrategy(GetFillStrategy());
+    }
 
-        private void OnStrategyChanged(object sender, int index)
-        {
-            _unityGame.SetGameBoardFillStrategy(GetFillStrategy(index));
-        }
+    /// 选择的填充策略
+    private RiseFillStrategy GetSelectedFillStrategy()
+    {
+        return GetFillStrategy();
+    }
 
-        /// 选择的填充策略
-        private IBoardFillStrategy<IUnityGridSlot> GetSelectedFillStrategy()
-        {
-            return GetFillStrategy(_gameUiCanvas.SelectedFillStrategyIndex);
-        }
-
-        private IBoardFillStrategy<IUnityGridSlot> GetFillStrategy(int index)
-        {
-            return _boardFillStrategies[index];
-        }
+    private RiseFillStrategy GetFillStrategy()
+    {
+        return _riseFillStrategy;
     }
 }

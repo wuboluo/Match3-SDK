@@ -2733,7 +2733,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1471934056
 Transform:
   m_ObjectHideFlags: 0
@@ -2932,6 +2932,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ae5152c810514f09803f66315a0aeab2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _app: {fileID: 680327096}
   _appContext: {fileID: 1397966486}
   _iconsSetDropdown: {fileID: 877584898}
   _fillStrategyDropdown: {fileID: 2092620871}

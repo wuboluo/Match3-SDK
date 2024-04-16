@@ -1,24 +1,16 @@
 using System.Collections.Generic;
-using Common.Interfaces;
-using Match3.Infrastructure.Interfaces;
 
-namespace Common.Extensions
+public static class ItemsPoolExtensions
 {
-    public static class ItemsPoolExtensions
+    public static void ReturnAllItems(this UnityItemGenerator itemsPool, IEnumerable<UnityGridSlot> gridSlots)
     {
-        public static void ReturnAllItems(this IItemsPool<IUnityItem> itemsPool, IEnumerable<IUnityGridSlot> gridSlots)
+        foreach (var gridSlot in gridSlots)
         {
-            foreach (var gridSlot in gridSlots)
-            {
-                if (gridSlot.Item == null)
-                {
-                    continue;
-                }
+            if (gridSlot.Item == null) continue;
 
-                itemsPool.RecycleItem(gridSlot.Item);
-                gridSlot.Item.Hide();
-                gridSlot.Clear();
-            }
+            itemsPool.RecycleItem(gridSlot.Item);
+            gridSlot.Item.Hide();
+            gridSlot.Clear();
         }
     }
 }

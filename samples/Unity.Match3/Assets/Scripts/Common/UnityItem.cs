@@ -1,60 +1,53 @@
-using Common.Interfaces;
 using UnityEngine;
 
-namespace Common
+public class UnityItem : MonoBehaviour
 {
-    public class UnityItem : MonoBehaviour, IUnityItem
+    [SerializeField] private SpriteRenderer _spriteRenderer;
+
+    private bool _isDestroyed;
+
+    public int ContentId { get; private set; }
+    public Transform Transform => transform;
+    public SpriteRenderer SpriteRenderer => _spriteRenderer;
+
+    private void OnDestroy()
     {
-        [SerializeField] private SpriteRenderer _spriteRenderer;
+        _isDestroyed = true;
+    }
 
-        private bool _isDestroyed;
+    public void Show()
+    {
+        gameObject.SetActive(true);
+    }
 
-        public int ContentId { get; private set; }
-        public Transform Transform => transform;
-        public SpriteRenderer SpriteRenderer => _spriteRenderer;
+    public void Hide()
+    {
+        gameObject.SetActive(false);
+    }
 
-        public void Show()
-        {
-            gameObject.SetActive(true);
-        }
+    public void SetSprite(int spriteId, Sprite sprite)
+    {
+        ContentId = spriteId;
+        _spriteRenderer.sprite = sprite;
+    }
 
-        public void Hide()
-        {
-            gameObject.SetActive(false);
-        }
+    public void SetWorldPosition(Vector3 worldPosition)
+    {
+        transform.position = worldPosition;
+    }
 
-        public void SetSprite(int spriteId, Sprite sprite)
-        {
-            ContentId = spriteId;
-            _spriteRenderer.sprite = sprite;
-        }
+    public Vector3 GetWorldPosition()
+    {
+        return transform.position;
+    }
 
-        public void SetWorldPosition(Vector3 worldPosition)
-        {
-            transform.position = worldPosition;
-        }
+    public void SetScale(float value)
+    {
+        transform.localScale = new Vector3(value, value, value);
+    }
 
-        public Vector3 GetWorldPosition()
-        {
-            return transform.position;
-        }
-
-        public void SetScale(float value)
-        {
-            transform.localScale = new Vector3(value, value, value);
-        }
-
-        private void OnDestroy()
-        {
-            _isDestroyed = true;
-        }
-
-        public void Dispose()
-        {
-            if (_isDestroyed == false)
-            {
-                Destroy(gameObject);
-            }
-        }
+    public void Dispose()
+    {
+        if (_isDestroyed == false) Destroy(gameObject);
     }
 }

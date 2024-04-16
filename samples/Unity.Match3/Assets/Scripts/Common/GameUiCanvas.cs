@@ -1,65 +1,61 @@
 using System;
 using System.Linq;
-using Common.Interfaces;
-using Common.Models;
-using Common.UiElements;
-using Match3.App;
-using Match3.App.Interfaces;
 using UnityEngine;
 
-namespace Common
+public class GameUiCanvas : MonoBehaviour
 {
-    public class GameUiCanvas : MonoBehaviour, IGameUiCanvas
+    [SerializeField] private App _app;
+    [SerializeField] private AppContext _appContext;
+    [SerializeField] private InteractableDropdown _iconsSetDropdown;
+    [SerializeField] private InteractableDropdown _fillStrategyDropdown;
+    [SerializeField] private InteractableButton _startGameButton;
+
+    public int SelectedIconsSetIndex => _iconsSetDropdown.SelectedIndex;
+    public int SelectedFillStrategyIndex => _fillStrategyDropdown.SelectedIndex;
+
+    private void Start()
     {
-        [SerializeField] private AppContext _appContext;
-        [SerializeField] private InteractableDropdown _iconsSetDropdown;
-        [SerializeField] private InteractableDropdown _fillStrategyDropdown;
-        [SerializeField] private InteractableButton _startGameButton;
+        _iconsSetDropdown.AddItems(_appContext.Resolve<IconsSetModel[]>().Select(iconsSet => iconsSet.Name));
+        // _fillStrategyDropdown.AddItems(_appContext.Resolve<RiseFillStrategy>().Select(strategy => strategy.Name));
+    }
 
-        public int SelectedIconsSetIndex => _iconsSetDropdown.SelectedIndex;
-        public int SelectedFillStrategyIndex => _fillStrategyDropdown.SelectedIndex;
+    private void OnEnable()
+    {
+        _startGameButton.Click += OnStartGameButtonClick;
+        _fillStrategyDropdown.IndexChanged += OnFillStrategyDropdownIndexChanged;
+    }
 
-        public event EventHandler StartGameClick;
-        public event EventHandler<int> StrategyChanged;
+    private void OnDisable()
+    {
+        _startGameButton.Click -= OnStartGameButtonClick;
+        _fillStrategyDropdown.IndexChanged -= OnFillStrategyDropdownIndexChanged;
+    }
 
-        private void Start()
-        {
-            _iconsSetDropdown.AddItems(_appContext.Resolve<IconsSetModel[]>().Select(iconsSet => iconsSet.Name));
-            _fillStrategyDropdown.AddItems(_appContext.Resolve<IBoardFillStrategy<IUnityGridSlot>[]>()
-                .Select(strategy => strategy.Name));
-        }
+    public event EventHandler StartGameClick;
+    public event EventHandler<int> StrategyChanged;
 
-        private void OnEnable()
-        {
-            _startGameButton.Click += OnStartGameButtonClick;
-            _fillStrategyDropdown.IndexChanged += OnFillStrategyDropdownIndexChanged;
-        }
+    public void ShowMessage(string message)
+    {
+        Debug.Log(message);
+    }
 
-        private void OnDisable()
-        {
-            _startGameButton.Click -= OnStartGameButtonClick;
-            _fillStrategyDropdown.IndexChanged -= OnFillStrategyDropdownIndexChanged;
-        }
+    /// 目标完成时（目标内容：单次消除一整行）
+    public void RegisterAchievedGoal(LevelGoal achievedGoal)
+    {
+        ShowMessage($"目标 {achievedGoal.GetType().Name} 已完成");
+    }
 
-        public void ShowMessage(string message)
-        {
-            Debug.Log(message);
-        }
+    private void OnStartGameButtonClick()
+    {
+        Debug.Log("游戏开始");
+        _app.drawGameBoardMode.Activate();
+        _app.gameInitMode.Activate();
+        _app.gamePlayMode.Activate();
+        // StartGameClick?.Invoke(this, EventArgs.Empty);
+    }
 
-        /// 目标完成时（目标内容：单次消除一整行）
-        public void RegisterAchievedGoal(LevelGoal<IUnityGridSlot> achievedGoal)
-        {
-            ShowMessage($"目标 {achievedGoal.GetType().Name} 已完成");
-        }
-
-        private void OnStartGameButtonClick()
-        {
-            StartGameClick?.Invoke(this, EventArgs.Empty);
-        }
-
-        private void OnFillStrategyDropdownIndexChanged(int index)
-        {
-            StrategyChanged?.Invoke(this, index);
-        }
+    private void OnFillStrategyDropdownIndexChanged(int index)
+    {
+        StrategyChanged?.Invoke(this, index);
     }
 }

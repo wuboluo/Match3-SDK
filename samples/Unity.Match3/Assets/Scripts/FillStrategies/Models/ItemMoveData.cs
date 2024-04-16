@@ -1,17 +1,13 @@
-﻿using Common.Interfaces;
-using UnityEngine;
+﻿using UnityEngine;
 
-namespace FillStrategies.Models
+public class ItemMoveData
 {
-    public class ItemMoveData
+    public ItemMoveData(UnityItem item, Vector3[] worldPositions)
     {
-        public ItemMoveData(IUnityItem item, Vector3[] worldPositions)
-        {
-            Item = item;
-            WorldPositions = worldPositions;
-        }
-
-        public IUnityItem Item { get; }
-        public Vector3[] WorldPositions { get; }
+        Item = item;
+        WorldPositions = worldPositions;
     }
+
+    public UnityItem Item { get; }
+    public Vector3[] WorldPositions { get; }
 }
