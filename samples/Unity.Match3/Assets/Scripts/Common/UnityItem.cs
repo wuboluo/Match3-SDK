@@ -1,53 +1,56 @@
 using UnityEngine;
 
-public class UnityItem : MonoBehaviour
+namespace Match3
 {
-    [SerializeField] private SpriteRenderer _spriteRenderer;
-
-    private bool _isDestroyed;
-
-    public int ContentId { get; private set; }
-    public Transform Transform => transform;
-    public SpriteRenderer SpriteRenderer => _spriteRenderer;
-
-    private void OnDestroy()
+    public class UnityItem : MonoBehaviour
     {
-        _isDestroyed = true;
-    }
+        [SerializeField] private SpriteRenderer _spriteRenderer;
 
-    public void Show()
-    {
-        gameObject.SetActive(true);
-    }
+        private bool _isDestroyed;
 
-    public void Hide()
-    {
-        gameObject.SetActive(false);
-    }
+        public int ContentId { get; private set; }
+        public Transform Transform => transform;
+        public SpriteRenderer SpriteRenderer => _spriteRenderer;
 
-    public void SetSprite(int spriteId, Sprite sprite)
-    {
-        ContentId = spriteId;
-        _spriteRenderer.sprite = sprite;
-    }
+        private void OnDestroy()
+        {
+            _isDestroyed = true;
+        }
 
-    public void SetWorldPosition(Vector3 worldPosition)
-    {
-        transform.position = worldPosition;
-    }
+        public void Show()
+        {
+            gameObject.SetActive(true);
+        }
 
-    public Vector3 GetWorldPosition()
-    {
-        return transform.position;
-    }
+        public void Hide()
+        {
+            gameObject.SetActive(false);
+        }
 
-    public void SetScale(float value)
-    {
-        transform.localScale = new Vector3(value, value, value);
-    }
+        public void SetSprite(int spriteId, Sprite sprite)
+        {
+            ContentId = spriteId;
+            _spriteRenderer.sprite = sprite;
+        }
 
-    public void Dispose()
-    {
-        if (_isDestroyed == false) Destroy(gameObject);
+        public void SetWorldPosition(Vector3 worldPosition)
+        {
+            transform.position = worldPosition;
+        }
+
+        public Vector3 GetWorldPosition()
+        {
+            return transform.position;
+        }
+
+        public void SetScale(float value)
+        {
+            transform.localScale = new Vector3(value, value, value);
+        }
+
+        public void Dispose()
+        {
+            if (_isDestroyed == false) Destroy(gameObject);
+        }
     }
 }

@@ -1,17 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
 
-public class ItemSequence
+namespace Match3
 {
-    public ItemSequence(Type sequenceDetectorType, IReadOnlyList<UnityGridSlot> solvedGridSlots)
+    public class ItemSequence
     {
-        SequenceDetectorType = sequenceDetectorType;
-        SolvedGridSlots = solvedGridSlots;
+        public ItemSequence(Type sequenceDetectorType, IReadOnlyList<UnityGridSlot> solvedGridSlots)
+        {
+            SequenceDetectorType = sequenceDetectorType;
+            SolvedGridSlots = solvedGridSlots;
+        }
+
+        // 序列检测器类型
+        public Type SequenceDetectorType { get; }
+
+        // 消除的格子集合
+        public IReadOnlyList<UnityGridSlot> SolvedGridSlots { get; }
     }
-
-    // 序列检测器类型
-    public Type SequenceDetectorType { get; }
-
-    // 消除的格子集合
-    public IReadOnlyList<UnityGridSlot> SolvedGridSlots { get; }
 }

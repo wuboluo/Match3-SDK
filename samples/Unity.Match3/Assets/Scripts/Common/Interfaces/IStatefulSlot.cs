@@ -1,5 +1,8 @@
-﻿public interface IStatefulSlot
+﻿namespace Match3
 {
-    bool NextState();
-    void ResetState();
+    public interface IStatefulSlot
+    {
+        bool NextState();
+        void ResetState();
+    }
 }

@@ -3,7 +3,7 @@ using System.Threading;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
 
-namespace FillStrategies.Jobs
+namespace Match3
 {
     public class ItemsMoveJob : MoveJob
     {

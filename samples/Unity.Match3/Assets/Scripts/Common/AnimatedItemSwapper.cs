@@ -2,29 +2,32 @@
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
 
-/// 道具交换动画
-public class AnimatedItemSwapper
+namespace Match3
 {
-    private const float SwapDuration = 0.2f;
-
-    public async UniTask SwapItemsAsync(UnityGridSlot gridSlot1, UnityGridSlot gridSlot2, CancellationToken cancellationToken = default)
+    /// 道具交换动画
+    public class AnimatedItemSwapper
     {
-        var item1 = gridSlot1.Item;
-        var item2 = gridSlot2.Item;
+        private const float SwapDuration = 0.2f;
 
-        var item1WorldPosition = item1.GetWorldPosition();
-        var item2WorldPosition = item2.GetWorldPosition();
+        public async UniTask SwapItemsAsync(UnityGridSlot gridSlot1, UnityGridSlot gridSlot2, CancellationToken cancellationToken = default)
+        {
+            var item1 = gridSlot1.Item;
+            var item2 = gridSlot2.Item;
 
-        await DOTween.Sequence()
-            .Join(item1.Transform.DOMove(item2WorldPosition, SwapDuration))
-            .Join(item2.Transform.DOMove(item1WorldPosition, SwapDuration))
-            .SetEase(Ease.Flash)
-            .WithCancellation(cancellationToken);
+            var item1WorldPosition = item1.GetWorldPosition();
+            var item2WorldPosition = item2.GetWorldPosition();
 
-        item1.SetWorldPosition(item2WorldPosition);
-        item2.SetWorldPosition(item1WorldPosition);
+            await DOTween.Sequence()
+                .Join(item1.Transform.DOMove(item2WorldPosition, SwapDuration))
+                .Join(item2.Transform.DOMove(item1WorldPosition, SwapDuration))
+                .SetEase(Ease.Flash)
+                .WithCancellation(cancellationToken);
 
-        gridSlot1.SetItem(item2);
-        gridSlot2.SetItem(item1);
+            item1.SetWorldPosition(item2WorldPosition);
+            item2.SetWorldPosition(item1WorldPosition);
+
+            gridSlot1.SetItem(item2);
+            gridSlot2.SetItem(item1);
+        }
     }
 }

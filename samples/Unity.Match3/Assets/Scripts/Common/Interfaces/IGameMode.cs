@@ -1,7 +1,10 @@
 ﻿using System;
 
-public interface IGameMode
+namespace Match3
 {
-    event EventHandler Finished;
-    void Activate();
+    public interface IGameMode
+    {
+        event EventHandler Finished;
+        void Activate();
+    }
 }

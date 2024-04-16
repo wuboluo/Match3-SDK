@@ -2,53 +2,64 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class CanvasInputSystem : MonoBehaviour
+namespace Match3
 {
-    [SerializeField] private Camera _camera;
-    [SerializeField] private EventTrigger _eventTrigger;
-
-    private void Awake()
+    public class CanvasInputSystem : MonoSingleton<CanvasInputSystem>
     {
-        var pointerDown = new EventTrigger.Entry { eventID = EventTriggerType.PointerDown };
-        pointerDown.callback.AddListener(data => { OnPointerDown((PointerEventData)data); });
+        private EventTrigger _eventTrigger;
+        private Camera _mainCam;
 
-        var pointerDrag = new EventTrigger.Entry { eventID = EventTriggerType.Drag };
-        pointerDrag.callback.AddListener(data => { OnPointerDrag((PointerEventData)data); });
+        public event EventHandler<PointerEventArgs> PointerDown;
+        public event EventHandler<PointerEventArgs> PointerDrag;
+        public event EventHandler<PointerEventArgs> PointerUp;
 
-        var pointerUp = new EventTrigger.Entry { eventID = EventTriggerType.PointerUp };
-        pointerUp.callback.AddListener(data => { OnPointerUp((PointerEventData)data); });
+        protected override void OnAwake()
+        {
+            _eventTrigger = GetComponent<EventTrigger>();
+            _mainCam = Camera.main;
 
-        _eventTrigger.triggers.Add(pointerDown);
-        _eventTrigger.triggers.Add(pointerDrag);
-        _eventTrigger.triggers.Add(pointerUp);
-    }
+            Init();
+        }
 
-    public event EventHandler<PointerEventArgs> PointerDown;
-    public event EventHandler<PointerEventArgs> PointerDrag;
-    public event EventHandler<PointerEventArgs> PointerUp;
+        private void Init()
+        {
+            var pointerDown = new EventTrigger.Entry { eventID = EventTriggerType.PointerDown };
+            pointerDown.callback.AddListener(data => { OnPointerDown((PointerEventData)data); });
 
-    private void OnPointerDown(PointerEventData e)
-    {
-        PointerDown?.Invoke(this, GetPointerEventArgs(e));
-    }
+            var pointerDrag = new EventTrigger.Entry { eventID = EventTriggerType.Drag };
+            pointerDrag.callback.AddListener(data => { OnPointerDrag((PointerEventData)data); });
 
-    private void OnPointerDrag(PointerEventData e)
-    {
-        PointerDrag?.Invoke(this, GetPointerEventArgs(e));
-    }
+            var pointerUp = new EventTrigger.Entry { eventID = EventTriggerType.PointerUp };
+            pointerUp.callback.AddListener(data => { OnPointerUp((PointerEventData)data); });
 
-    private void OnPointerUp(PointerEventData e)
-    {
-        PointerUp?.Invoke(this, GetPointerEventArgs(e));
-    }
+            _eventTrigger.triggers.Add(pointerDown);
+            _eventTrigger.triggers.Add(pointerDrag);
+            _eventTrigger.triggers.Add(pointerUp);
+        }
 
-    private PointerEventArgs GetPointerEventArgs(PointerEventData e)
-    {
-        return new PointerEventArgs(e.button, GetWorldPosition(e.position));
-    }
+        private void OnPointerDown(PointerEventData e)
+        {
+            PointerDown?.Invoke(this, GetPointerEventArgs(e));
+        }
 
-    private Vector2 GetWorldPosition(Vector2 screenPosition)
-    {
-        return _camera.ScreenToWorldPoint(screenPosition);
+        private void OnPointerDrag(PointerEventData e)
+        {
+            PointerDrag?.Invoke(this, GetPointerEventArgs(e));
+        }
+
+        private void OnPointerUp(PointerEventData e)
+        {
+            PointerUp?.Invoke(this, GetPointerEventArgs(e));
+        }
+
+        private PointerEventArgs GetPointerEventArgs(PointerEventData e)
+        {
+            return new PointerEventArgs(e.button, GetWorldPosition(e.position));
+        }
+
+        private Vector2 GetWorldPosition(Vector2 screenPosition)
+        {
+            return _mainCam.ScreenToWorldPoint(screenPosition);
+        }
     }
 }

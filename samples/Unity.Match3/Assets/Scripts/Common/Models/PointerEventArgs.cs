@@ -2,14 +2,17 @@ using System;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class PointerEventArgs : EventArgs
+namespace Match3
 {
-    public PointerEventArgs(PointerEventData.InputButton button, Vector3 worldPosition)
+    public class PointerEventArgs : EventArgs
     {
-        Button = button;
-        WorldPosition = worldPosition;
-    }
+        public PointerEventArgs(PointerEventData.InputButton button, Vector3 worldPosition)
+        {
+            Button = button;
+            WorldPosition = worldPosition;
+        }
 
-    public Vector3 WorldPosition { get; }
-    public PointerEventData.InputButton Button { get; }
+        public Vector3 WorldPosition { get; }
+        public PointerEventData.InputButton Button { get; }
+    }
 }

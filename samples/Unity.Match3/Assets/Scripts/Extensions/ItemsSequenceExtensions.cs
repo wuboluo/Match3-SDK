@@ -1,18 +1,21 @@
 ﻿using System.Collections.Generic;
 
-public static class ItemsSequenceExtensions
+namespace Match3
 {
-    public static IEnumerable<UnityGridSlot> GetUniqueSolvedGridSlots(this SolvedData solvedData, bool onlyMovable = false)
+    public static class ItemsSequenceExtensions
     {
-        var solvedGridSlots = new HashSet<UnityGridSlot>();
-
-        foreach (var solvedGridSlot in solvedData.GetSolvedGridSlots(onlyMovable))
+        public static IEnumerable<UnityGridSlot> GetUniqueSolvedGridSlots(this SolvedData solvedData, bool onlyMovable = false)
         {
-            if (!solvedGridSlots.Add(solvedGridSlot)) continue;
+            var solvedGridSlots = new HashSet<UnityGridSlot>();
 
-            yield return solvedGridSlot;
+            foreach (var solvedGridSlot in solvedData.GetSolvedGridSlots(onlyMovable))
+            {
+                if (!solvedGridSlots.Add(solvedGridSlot)) continue;
+
+                yield return solvedGridSlot;
+            }
+
+            solvedGridSlots.Clear();
         }
-
-        solvedGridSlots.Clear();
     }
 }

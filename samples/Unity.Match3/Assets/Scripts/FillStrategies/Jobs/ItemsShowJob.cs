@@ -4,30 +4,33 @@ using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using UnityEngine;
 
-public class ItemsShowJob : Job
+namespace Match3
 {
-    private const float ScaleDuration = 0.5f;
-
-    private readonly IEnumerable<UnityItem> _items;
-
-    public ItemsShowJob(IEnumerable<UnityItem> items, int executionOrder = 0) : base(executionOrder)
+    public class ItemsShowJob : Job
     {
-        _items = items;
-    }
+        private const float ScaleDuration = 0.5f;
 
-    public override async UniTask ExecuteAsync(CancellationToken cancellationToken = default)
-    {
-        var itemsSequence = DOTween.Sequence();
+        private readonly IEnumerable<UnityItem> _items;
 
-        foreach (var item in _items)
+        public ItemsShowJob(IEnumerable<UnityItem> items, int executionOrder = 0) : base(executionOrder)
         {
-            item.SpriteRenderer.SetAlpha(1);
-            item.SetScale(0);
-            item.Show();
-
-            _ = itemsSequence.Join(item.Transform.DOScale(Vector3.one, ScaleDuration));
+            _items = items;
         }
 
-        await itemsSequence.SetEase(Ease.OutBounce).WithCancellation(cancellationToken);
+        public override async UniTask ExecuteAsync(CancellationToken cancellationToken = default)
+        {
+            var itemsSequence = DOTween.Sequence();
+
+            foreach (var item in _items)
+            {
+                item.SpriteRenderer.SetAlpha(1);
+                item.SetScale(0);
+                item.Show();
+
+                _ = itemsSequence.Join(item.Transform.DOScale(Vector3.one, ScaleDuration));
+            }
+
+            await itemsSequence.SetEase(Ease.OutBounce).WithCancellation(cancellationToken);
+        }
     }
 }

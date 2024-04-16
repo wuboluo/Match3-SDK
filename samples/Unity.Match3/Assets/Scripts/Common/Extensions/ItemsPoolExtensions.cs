@@ -1,16 +1,19 @@
 using System.Collections.Generic;
 
-public static class ItemsPoolExtensions
+namespace Match3
 {
-    public static void ReturnAllItems(this UnityItemGenerator itemsPool, IEnumerable<UnityGridSlot> gridSlots)
+    public static class ItemsPoolExtensions
     {
-        foreach (var gridSlot in gridSlots)
+        public static void ReturnAllItems(this Game_ItemGenerateComponent itemsPool, IEnumerable<UnityGridSlot> gridSlots)
         {
-            if (gridSlot.Item == null) continue;
+            foreach (var gridSlot in gridSlots)
+            {
+                if (gridSlot.Item == null) continue;
 
-            itemsPool.RecycleItem(gridSlot.Item);
-            gridSlot.Item.Hide();
-            gridSlot.Clear();
+                itemsPool.RecycleItem(gridSlot.Item);
+                gridSlot.Item.Hide();
+                gridSlot.Clear();
+            }
         }
     }
 }

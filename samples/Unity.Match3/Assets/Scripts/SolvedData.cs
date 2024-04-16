@@ -1,37 +1,40 @@
 ﻿using System.Collections.Generic;
 
-public class SolvedData
+namespace Match3
 {
-    public SolvedData(IReadOnlyCollection<ItemSequence> solvedSequences, IReadOnlyCollection<UnityGridSlot> specialItemGridSlots)
+    public class SolvedData
     {
-        SolvedSequences = solvedSequences;
-        SpecialItemGridSlots = specialItemGridSlots;
-    }
-
-    /// 消除的序列集合
-    public IReadOnlyCollection<ItemSequence> SolvedSequences { get; }
-
-    /// 被特殊消除掉的格子集合
-    public IReadOnlyCollection<UnityGridSlot> SpecialItemGridSlots { get; }
-
-    public IEnumerable<UnityGridSlot> GetSolvedGridSlots(bool onlyMovable = false)
-    {
-        foreach (var sequence in SolvedSequences)
-        foreach (var solvedGridSlot in sequence.SolvedGridSlots)
+        public SolvedData(IReadOnlyCollection<ItemSequence> solvedSequences, IReadOnlyCollection<UnityGridSlot> specialItemGridSlots)
         {
-            if (onlyMovable && !solvedGridSlot.IsMovable) continue;
-
-            yield return solvedGridSlot;
+            SolvedSequences = solvedSequences;
+            SpecialItemGridSlots = specialItemGridSlots;
         }
-    }
 
-    public IEnumerable<UnityGridSlot> GetSpecialItemGridSlots(bool excludeOccupied = false)
-    {
-        foreach (var specialItemGridSlot in SpecialItemGridSlots)
+        /// 消除的序列集合
+        public IReadOnlyCollection<ItemSequence> SolvedSequences { get; }
+
+        /// 被特殊消除掉的格子集合
+        public IReadOnlyCollection<UnityGridSlot> SpecialItemGridSlots { get; }
+
+        public IEnumerable<UnityGridSlot> GetSolvedGridSlots(bool onlyMovable = false)
         {
-            if (excludeOccupied && specialItemGridSlot.HasItem) continue;
+            foreach (var sequence in SolvedSequences)
+            foreach (var solvedGridSlot in sequence.SolvedGridSlots)
+            {
+                if (onlyMovable && !solvedGridSlot.IsMovable) continue;
 
-            yield return specialItemGridSlot;
+                yield return solvedGridSlot;
+            }
+        }
+
+        public IEnumerable<UnityGridSlot> GetSpecialItemGridSlots(bool excludeOccupied = false)
+        {
+            foreach (var specialItemGridSlot in SpecialItemGridSlots)
+            {
+                if (excludeOccupied && specialItemGridSlot.HasItem) continue;
+
+                yield return specialItemGridSlot;
+            }
         }
     }
 }

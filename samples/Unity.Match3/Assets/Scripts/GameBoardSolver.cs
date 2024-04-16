@@ -4,70 +4,73 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 
-/// 游戏消除器
-public class GameBoardSolver
+namespace Match3
 {
-    // 方向序列检测器
-    private readonly LineDetector[] _dirSequenceDetectors;
-
-    // 特殊道具检测器
-    private readonly ISpecialItemDetector[] _specialItemDetectors;
-
-    public GameBoardSolver(LineDetector[] dirSequenceDetectors, ISpecialItemDetector[] specialItemDetectors)
+    /// 游戏消除器
+    public class GameBoardSolver
     {
-        _dirSequenceDetectors = dirSequenceDetectors;
-        _specialItemDetectors = specialItemDetectors;
-    }
+        // 方向序列检测器
+        private readonly ILineDetect[] _dirSequenceDetectors;
 
-    /// 消除
-    public SolvedData Solve(GameBoard gameBoard, params GridPosition[] gridPositions)
-    {
-        Debug.Log("交换");
+        // 特殊道具检测器
+        private readonly ISpecialItemDetector[] _specialItemDetectors;
 
-        var resultSequences = new Collection<ItemSequence>();
-        var specialItemGridSlots = new HashSet<UnityGridSlot>();
-
-        foreach (var gridPosition in gridPositions)
-            // 横向 纵向
-        foreach (var dirSeqDetector in _dirSequenceDetectors)
+        public GameBoardSolver(ILineDetect[] dirSequenceDetectors, ISpecialItemDetector[] specialItemDetectors)
         {
-            var sequence = dirSeqDetector.GetSequence(gameBoard, gridPosition);
-            if (sequence == null)
-                // 不足3个时返回null
-                continue;
-
-            if (!IsNewSequence(sequence, resultSequences)) continue;
-
-            // todo 
-            if (_specialItemDetectors != null)
-                foreach (var specialItemGridSlot in GetSpecialItemGridSlots(gameBoard, sequence))
-                    specialItemGridSlots.Add(specialItemGridSlot);
-
-            resultSequences.Add(sequence);
+            _dirSequenceDetectors = dirSequenceDetectors;
+            _specialItemDetectors = specialItemDetectors;
         }
 
-        return new SolvedData(resultSequences, specialItemGridSlots);
-    }
-
-    private static bool IsNewSequence(ItemSequence newSequence, IEnumerable<ItemSequence> sequences)
-    {
-        var sequencesByType = sequences.Where(sequence => sequence.SequenceDetectorType == newSequence.SequenceDetectorType);
-        var newSequenceGridSlot = newSequence.SolvedGridSlots[0];
-
-        return sequencesByType.All(sequence => !sequence.SolvedGridSlots.Contains(newSequenceGridSlot));
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private IEnumerable<UnityGridSlot> GetSpecialItemGridSlots(GameBoard gameBoard, ItemSequence sequence)
-    {
-        foreach (var itemDetector in _specialItemDetectors)
-        foreach (var solvedGridSlot in sequence.SolvedGridSlots)
-        foreach (var specialItemGridSlot in itemDetector.GetSpecialItemGridSlots(gameBoard, solvedGridSlot))
+        /// 消除
+        public SolvedData Solve(GameBoard gameBoard, params GridPosition[] gridPositions)
         {
-            var hasNextState = ((IStatefulSlot)specialItemGridSlot.State).NextState();
-            if (hasNextState) continue;
+            Debug.Log("交换");
 
-            yield return specialItemGridSlot;
+            var resultSequences = new Collection<ItemSequence>();
+            var specialItemGridSlots = new HashSet<UnityGridSlot>();
+
+            foreach (var gridPosition in gridPositions)
+                // 横向 纵向
+            foreach (var dirSeqDetector in _dirSequenceDetectors)
+            {
+                var sequence = dirSeqDetector.GetSequence(gameBoard, gridPosition);
+                if (sequence == null)
+                    // 不足3个时返回null
+                    continue;
+
+                if (!IsNewSequence(sequence, resultSequences)) continue;
+
+                // todo 
+                if (_specialItemDetectors != null)
+                    foreach (var specialItemGridSlot in GetSpecialItemGridSlots(gameBoard, sequence))
+                        specialItemGridSlots.Add(specialItemGridSlot);
+
+                resultSequences.Add(sequence);
+            }
+
+            return new SolvedData(resultSequences, specialItemGridSlots);
+        }
+
+        private static bool IsNewSequence(ItemSequence newSequence, IEnumerable<ItemSequence> sequences)
+        {
+            var sequencesByType = sequences.Where(sequence => sequence.SequenceDetectorType == newSequence.SequenceDetectorType);
+            var newSequenceGridSlot = newSequence.SolvedGridSlots[0];
+
+            return sequencesByType.All(sequence => !sequence.SolvedGridSlots.Contains(newSequenceGridSlot));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private IEnumerable<UnityGridSlot> GetSpecialItemGridSlots(GameBoard gameBoard, ItemSequence sequence)
+        {
+            foreach (var itemDetector in _specialItemDetectors)
+            foreach (var solvedGridSlot in sequence.SolvedGridSlots)
+            foreach (var specialItemGridSlot in itemDetector.GetSpecialItemGridSlots(gameBoard, solvedGridSlot))
+            {
+                var hasNextState = ((IStatefulSlot)specialItemGridSlot.State).NextState();
+                if (hasNextState) continue;
+
+                yield return specialItemGridSlot;
+            }
         }
     }
 }

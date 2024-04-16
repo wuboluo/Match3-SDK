@@ -1,13 +1,16 @@
 ﻿using UnityEngine;
 
-public class ItemMoveData
+namespace Match3
 {
-    public ItemMoveData(UnityItem item, Vector3[] worldPositions)
+    public class ItemMoveData
     {
-        Item = item;
-        WorldPositions = worldPositions;
-    }
+        public ItemMoveData(UnityItem item, Vector3[] worldPositions)
+        {
+            Item = item;
+            WorldPositions = worldPositions;
+        }
 
-    public UnityItem Item { get; }
-    public Vector3[] WorldPositions { get; }
+        public UnityItem Item { get; }
+        public Vector3[] WorldPositions { get; }
+    }
 }

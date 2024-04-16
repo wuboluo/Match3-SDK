@@ -4,29 +4,32 @@ using Cysharp.Threading.Tasks;
 using DG.Tweening;
 using UnityEngine;
 
-public class ItemsHideJob : Job
+namespace Match3
 {
-    private const float FadeDuration = 0.15f;
-    private const float ScaleDuration = 0.25f;
-
-    private readonly IEnumerable<UnityItem> _items;
-
-    public ItemsHideJob(IEnumerable<UnityItem> items, int executionOrder = 0) : base(executionOrder)
+    public class ItemsHideJob : Job
     {
-        _items = items;
-    }
+        private const float FadeDuration = 0.15f;
+        private const float ScaleDuration = 0.25f;
 
-    public override async UniTask ExecuteAsync(CancellationToken cancellationToken = default)
-    {
-        var itemsSequence = DOTween.Sequence();
+        private readonly IEnumerable<UnityItem> _items;
 
-        foreach (var item in _items)
-            _ = itemsSequence
-                .Join(item.Transform.DOScale(Vector3.zero, ScaleDuration))
-                .Join(item.SpriteRenderer.DOFade(0, FadeDuration));
+        public ItemsHideJob(IEnumerable<UnityItem> items, int executionOrder = 0) : base(executionOrder)
+        {
+            _items = items;
+        }
 
-        await itemsSequence.WithCancellation(cancellationToken);
+        public override async UniTask ExecuteAsync(CancellationToken cancellationToken = default)
+        {
+            var itemsSequence = DOTween.Sequence();
 
-        foreach (var item in _items) item.Hide();
+            foreach (var item in _items)
+                _ = itemsSequence
+                    .Join(item.Transform.DOScale(Vector3.zero, ScaleDuration))
+                    .Join(item.SpriteRenderer.DOFade(0, FadeDuration));
+
+            await itemsSequence.WithCancellation(cancellationToken);
+
+            foreach (var item in _items) item.Hide();
+        }
     }
 }

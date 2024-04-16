@@ -1,30 +1,33 @@
 using UnityEngine;
 
-public abstract class GridTile : MonoBehaviour, IGridTile
+namespace Match3
 {
-    private bool _isDestroyed;
-
-    private void OnDestroy()
+    public abstract class GridTile : MonoBehaviour, IGridTile
     {
-        _isDestroyed = true;
-    }
+        private bool _isDestroyed;
 
-    public abstract int TypeId { get; }
-    public abstract bool IsLocked { get; }
-    public abstract bool CanContainItem { get; }
+        private void OnDestroy()
+        {
+            _isDestroyed = true;
+        }
 
-    public void SetActive(bool value)
-    {
-        gameObject.SetActive(value);
-    }
+        public abstract int TypeId { get; }
+        public abstract bool IsLocked { get; }
+        public abstract bool CanContainItem { get; }
 
-    public void SetWorldPosition(Vector3 worldPosition)
-    {
-        transform.position = worldPosition;
-    }
+        public void SetActive(bool value)
+        {
+            gameObject.SetActive(value);
+        }
 
-    public void Dispose()
-    {
-        if (_isDestroyed == false) Destroy(gameObject);
+        public void SetWorldPosition(Vector3 worldPosition)
+        {
+            transform.position = worldPosition;
+        }
+
+        public void Dispose()
+        {
+            if (_isDestroyed == false) Destroy(gameObject);
+        }
     }
 }

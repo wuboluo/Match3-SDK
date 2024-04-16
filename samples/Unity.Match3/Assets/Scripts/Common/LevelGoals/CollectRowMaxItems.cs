@@ -1,58 +1,61 @@
 using UnityEngine;
 
-/// 任务：单次消除一整行
-public class CollectRowMaxItems : LevelGoal
+namespace Match3
 {
-    private readonly int _maxRowLength;
-
-    public CollectRowMaxItems(GameBoard gameBoard)
+    /// 任务：单次消除一整行
+    public class CollectRowMaxItems : LevelGoal
     {
-        _maxRowLength = GetMaxRowLength(gameBoard);
-    }
+        private readonly int _maxRowLength;
 
-    /// 如果一次消除了一整行，就NB了
-    public override void OnSequencesSolved(SolvedData solvedData)
-    {
-        // 所有的消除序列
-        foreach (var sequence in solvedData.SolvedSequences)
+        public CollectRowMaxItems(GameBoard gameBoard)
         {
-            // 纵向的不算，因为这个目标就是单次消除一整行
-            if (sequence.SequenceDetectorType != typeof(HorizontalLineDetector)) continue;
-
-            // 如果单次消除了一行最大格子数量
-            if (sequence.SolvedGridSlots.Count == _maxRowLength)
-                // 标记此任务已完成
-                MarkAchieved();
+            _maxRowLength = GetMaxRowLength(gameBoard);
         }
-    }
 
-    /// 单行最多有几个可用的格子，如果中间有障碍的话，可能小于棋盘宽度
-    private static int GetMaxRowLength(GameBoard gameBoard)
-    {
-        var maxRowLength = 0;
-
-        for (var rowIndex = 0; rowIndex < gameBoard.RowCount; rowIndex++)
+        /// 如果一次消除了一整行，就NB了
+        public override void OnSequencesSolved(SolvedData solvedData)
         {
-            var maxRowSlots = 0;
-            var availableSlots = 0;
-
-            for (var columnIndex = 0; columnIndex < gameBoard.ColumnCount; columnIndex++)
+            // 所有的消除序列
+            foreach (var sequence in solvedData.SolvedSequences)
             {
-                if (gameBoard[rowIndex, columnIndex].State.CanContainItem)
+                // 纵向的不算，因为这个目标就是单次消除一整行
+                if (sequence.SequenceDetectorType != typeof(Game_HorizontalLineDetectComponent)) continue;
+
+                // 如果单次消除了一行最大格子数量
+                if (sequence.SolvedGridSlots.Count == _maxRowLength)
+                    // 标记此任务已完成
+                    MarkAchieved();
+            }
+        }
+
+        /// 单行最多有几个可用的格子，如果中间有障碍的话，可能小于棋盘宽度
+        private static int GetMaxRowLength(GameBoard gameBoard)
+        {
+            var maxRowLength = 0;
+
+            for (var rowIndex = 0; rowIndex < gameBoard.RowCount; rowIndex++)
+            {
+                var maxRowSlots = 0;
+                var availableSlots = 0;
+
+                for (var columnIndex = 0; columnIndex < gameBoard.ColumnCount; columnIndex++)
                 {
-                    availableSlots++;
-                    continue;
+                    if (gameBoard[rowIndex, columnIndex].State.CanContainItem)
+                    {
+                        availableSlots++;
+                        continue;
+                    }
+
+                    if (availableSlots > maxRowSlots) maxRowSlots = availableSlots;
+
+                    availableSlots = 0;
                 }
 
-                if (availableSlots > maxRowSlots) maxRowSlots = availableSlots;
-
-                availableSlots = 0;
+                var maxLength = Mathf.Max(maxRowSlots, availableSlots);
+                if (maxLength > maxRowLength) maxRowLength = maxLength;
             }
 
-            var maxLength = Mathf.Max(maxRowSlots, availableSlots);
-            if (maxLength > maxRowLength) maxRowLength = maxLength;
+            return maxRowLength;
         }
-
-        return maxRowLength;
     }
 }

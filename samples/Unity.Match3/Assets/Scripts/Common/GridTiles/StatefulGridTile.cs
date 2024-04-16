@@ -1,48 +1,51 @@
 using UnityEngine;
 
-public abstract class StatefulGridTile : SpriteGridTile, IStatefulSlot
+namespace Match3
 {
-    [Space] [SerializeField] private SpriteRenderer _stateSpriteRenderer;
-    [SerializeField] private string[] _stateSpriteNames;
-
-    private int _currentStateIndex;
-
-    protected override void Start()
+    public abstract class StatefulGridTile : SpriteGridTile, IStatefulSlot
     {
-        base.Start();
-        _stateSpriteRenderer.sprite = GetStateSprite(_currentStateIndex);
-    }
+        [Space] [SerializeField] private SpriteRenderer _stateSpriteRenderer;
+        [SerializeField] private string[] _stateSpriteNames;
 
-    public bool NextState()
-    {
-        _currentStateIndex++;
+        private int _currentStateIndex;
 
-        if (_currentStateIndex < _stateSpriteNames.Length)
+        protected override void Start()
         {
+            base.Start();
             _stateSpriteRenderer.sprite = GetStateSprite(_currentStateIndex);
-            return true;
         }
 
-        _stateSpriteRenderer.enabled = false;
-        OnComplete();
+        public bool NextState()
+        {
+            _currentStateIndex++;
 
-        return false;
-    }
+            if (_currentStateIndex < _stateSpriteNames.Length)
+            {
+                _stateSpriteRenderer.sprite = GetStateSprite(_currentStateIndex);
+                return true;
+            }
 
-    public void ResetState()
-    {
-        _currentStateIndex = 0;
-        _stateSpriteRenderer.enabled = true;
-        _stateSpriteRenderer.sprite = GetStateSprite(0);
+            _stateSpriteRenderer.enabled = false;
+            OnComplete();
 
-        OnReset();
-    }
+            return false;
+        }
 
-    protected abstract void OnComplete();
-    protected abstract void OnReset();
+        public void ResetState()
+        {
+            _currentStateIndex = 0;
+            _stateSpriteRenderer.enabled = true;
+            _stateSpriteRenderer.sprite = GetStateSprite(0);
 
-    private Sprite GetStateSprite(int index)
-    {
-        return GetSprite(_stateSpriteNames[index]);
+            OnReset();
+        }
+
+        protected abstract void OnComplete();
+        protected abstract void OnReset();
+
+        private Sprite GetStateSprite(int index)
+        {
+            return GetSprite(_stateSpriteNames[index]);
+        }
     }
 }

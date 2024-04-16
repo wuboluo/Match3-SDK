@@ -1,6 +1,14 @@
-public class GameConfig
+namespace Match3
 {
-    public AnimatedItemSwapper ItemSwapper { get; set; }
-    public GameBoardSolver GameBoardSolver { get; set; }
-    public UnityGameBoardRenderer GameBoardDataProvider { get; set; }
+    public class GameConfig
+    {
+        /// 棋盘绘制器
+        public GameBoardData GameBoardData { get; set; }
+
+        /// 交换动画
+        public AnimatedItemSwapper ItemSwapper { get; set; }
+
+        /// 消除解决方案
+        public GameBoardSolver GameBoardSolver { get; set; }
+    }
 }

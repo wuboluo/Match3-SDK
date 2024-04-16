@@ -1,10 +1,13 @@
 using UnityEngine;
 
-public static class SpriteRendererExtensions
+namespace Match3
 {
-    public static void SetAlpha(this SpriteRenderer spriteRenderer, float value)
+    public static class SpriteRendererExtensions
     {
-        var color = spriteRenderer.color;
-        spriteRenderer.color = new Color(color.r, color.g, color.b, value);
+        public static void SetAlpha(this SpriteRenderer spriteRenderer, float value)
+        {
+            var color = spriteRenderer.color;
+            spriteRenderer.color = new Color(color.r, color.g, color.b, value);
+        }
     }
 }

@@ -1,6 +1,9 @@
-public class NotAvailableState : GridTile
+namespace Match3
 {
-    public override int TypeId => (int)TileType.Unavailable;
-    public override bool IsLocked => true;
-    public override bool CanContainItem => false;
+    public class NotAvailableState : GridTile
+    {
+        public override int TypeId => (int)TileType.Unavailable;
+        public override bool IsLocked => true;
+        public override bool CanContainItem => false;
+    }
 }

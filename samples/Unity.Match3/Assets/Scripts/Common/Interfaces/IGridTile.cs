@@ -1,8 +1,11 @@
 using System;
 using UnityEngine;
 
-public interface IGridTile : IGridSlotState, IDisposable
+namespace Match3
 {
-    void SetActive(bool value);
-    void SetWorldPosition(Vector3 worldPosition);
+    public interface IGridTile : IGridSlotState, IDisposable
+    {
+        void SetActive(bool value);
+        void SetWorldPosition(Vector3 worldPosition);
+    }
 }

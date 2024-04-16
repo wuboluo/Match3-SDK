@@ -1,13 +1,16 @@
 using UnityEngine;
 using UnityEngine.U2D;
 
-public static class SpriteAtlasExtensions
+namespace Match3
 {
-    public static Sprite[] GetSprites(this SpriteAtlas spriteAtlas)
+    public static class SpriteAtlasExtensions
     {
-        var sprites = new Sprite[spriteAtlas.spriteCount];
-        spriteAtlas.GetSprites(sprites);
+        public static Sprite[] GetSprites(this SpriteAtlas spriteAtlas)
+        {
+            var sprites = new Sprite[spriteAtlas.spriteCount];
+            spriteAtlas.GetSprites(sprites);
 
-        return sprites;
+            return sprites;
+        }
     }
 }

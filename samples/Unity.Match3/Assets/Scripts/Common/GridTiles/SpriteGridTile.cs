@@ -1,19 +1,22 @@
 using UnityEngine;
 using UnityEngine.U2D;
 
-[RequireComponent(typeof(SpriteRenderer))]
-public abstract class SpriteGridTile : GridTile
+namespace Match3
 {
-    [SerializeField] private SpriteAtlas _spriteAtlas;
-    [SerializeField] private string _spriteName;
-
-    protected virtual void Start()
+    [RequireComponent(typeof(SpriteRenderer))]
+    public abstract class SpriteGridTile : GridTile
     {
-        GetComponent<SpriteRenderer>().sprite = GetSprite(_spriteName);
-    }
+        [SerializeField] private SpriteAtlas _spriteAtlas;
+        [SerializeField] private string _spriteName;
 
-    protected Sprite GetSprite(string spriteName)
-    {
-        return _spriteAtlas.GetSprite(spriteName);
+        protected virtual void Start()
+        {
+            GetComponent<SpriteRenderer>().sprite = GetSprite(_spriteName);
+        }
+
+        protected Sprite GetSprite(string spriteName)
+        {
+            return _spriteAtlas.GetSprite(spriteName);
+        }
     }
 }

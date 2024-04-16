@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 
-namespace Match3.App.Internal
+namespace Match3
 {
     /// Job执行者
     internal abstract class JobsExecutor
