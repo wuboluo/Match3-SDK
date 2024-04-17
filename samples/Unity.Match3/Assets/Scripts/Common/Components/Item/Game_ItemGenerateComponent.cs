@@ -12,7 +12,7 @@ namespace Match3
         private readonly Transform _poolRoot;
         private readonly Sprite[] _sprites;
 
-        private Queue<UnityItem> _itemsPool;
+        private Queue<Game_ItemComponent> _itemsPool;
 
         public Game_ItemGenerateComponent(GameObject itemPrefab, Transform poolRoot, SpriteAtlas sprites)
         {
@@ -24,7 +24,7 @@ namespace Match3
         }
 
         /// 棋盘生成时，创建所有的棋子道具
-        public void CreateBoardItems(UnityGridSlot[,] gridSlots)
+        public void CreateBoardItems(Game_SlotComponent[,] gridSlots)
         {
             var rowCount = gridSlots.GetLength(0);
             var columnCount = gridSlots.GetLength(1);
@@ -36,8 +36,8 @@ namespace Match3
 
         private void InitPool(int capacity)
         {
-            _itemsPool ??= new Queue<UnityItem>(capacity);
-            _itemsPool = new Queue<UnityItem>(capacity);
+            _itemsPool ??= new Queue<Game_ItemComponent>(capacity);
+            _itemsPool = new Queue<Game_ItemComponent>(capacity);
 
             for (var i = 0; i < capacity; i++)
             {
@@ -45,31 +45,31 @@ namespace Match3
             }
         }
 
-        private UnityItem NewItem()
+        private Game_ItemComponent NewItem()
         {
-            var item = _itemPrefab.CreateNew<UnityItem>(parent: _poolRoot);
+            var item = _itemPrefab.CreateNew<Game_ItemComponent>(parent: _poolRoot);
             item.Hide();
 
             return item;
         }
 
         /// 随机一个图案
-        private UnityItem SetSprite(UnityItem item)
+        private Game_ItemComponent SetSprite(Game_ItemComponent itemComponent)
         {
             var index = _random.Next(0, _sprites.Length);
-            item.SetSprite(index, _sprites[index]);
+            itemComponent.SetSprite(index, _sprites[index]);
 
-            return item;
+            return itemComponent;
         }
 
-        public UnityItem FetchItem()
+        public Game_ItemComponent FetchItem()
         {
-            return SetSprite(_itemsPool.Dequeue());
+            return SetSprite(_itemsPool.Count <= 0 ? NewItem() : _itemsPool.Dequeue());
         }
 
-        public void RecycleItem(UnityItem item)
+        public void RecycleItem(Game_ItemComponent itemComponent)
         {
-            _itemsPool.Enqueue(item);
+            _itemsPool.Enqueue(itemComponent);
         }
     }
 }

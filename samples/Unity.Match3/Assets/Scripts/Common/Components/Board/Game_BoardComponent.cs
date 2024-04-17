@@ -7,31 +7,38 @@ namespace Match3
 {
     public class Game_BoardComponent : Component
     {
-        private readonly int _rowCount;
-        private readonly int _columnCount;
         private readonly float _tileSize;
+        private readonly Game_ItemComponent[,] _gridTiles;
+        private readonly Game_SlotComponent[,] _gridSlots;
         private readonly Vector3 _originPosition;
-
-        private readonly UnityGridSlot[,] _gridSlots;
-        private readonly IGridTile[,] _gridTiles;
 
         private AsyncLazy _swapItemsTask;
 
-        public GameBoard GameBoard { get; }
-
         public Game_BoardComponent(int rowCount, int columnCount, float tileSize)
         {
-            _rowCount = rowCount;
-            _columnCount = columnCount;
-            _tileSize = tileSize;
-            _originPosition = GetOriginPosition(_rowCount, _columnCount);
-            _gridTiles = new IGridTile[_rowCount, _columnCount];
-            _gridSlots = new UnityGridSlot[_rowCount, _columnCount];
+            RowCount = rowCount;
+            ColumnCount = columnCount;
 
-            GameBoard = new GameBoard();
+            _tileSize = tileSize;
+            _gridTiles = new Game_ItemComponent[rowCount, columnCount];
+            _gridSlots = new Game_SlotComponent[rowCount, columnCount];
+            _originPosition = GetOriginPosition(rowCount, columnCount);
         }
 
-        public UnityGridSlot[,] GetGridSlots()
+        public int RowCount { get; }
+        public int ColumnCount { get; }
+
+        public Game_SlotComponent GetGridSlot(GridPosition pos)
+        {
+            return GetGridSlot(pos.RowIndex, pos.ColumnIndex);
+        }
+
+        public Game_SlotComponent GetGridSlot(int row, int column)
+        {
+            return GetGridSlots()[row, column];
+        }
+
+        public Game_SlotComponent[,] GetGridSlots()
         {
             return _gridSlots;
         }
@@ -39,7 +46,8 @@ namespace Match3
         /// 某个位置的棋子是否已启用
         private bool IsTileActive(GridPosition gridPosition)
         {
-            return GetTileType(gridPosition) != TileType.Unavailable;
+            return true;
+            // return GetTileType(gridPosition) != TileType.Unavailable;
         }
 
         /// 鼠标是否在棋盘内，如果在就返回所在的格子位置
@@ -50,7 +58,7 @@ namespace Match3
         }
 
         /// 鼠标是否在格子内 and 此格子可操作
-        private bool IsPositionOnBoard(GridPosition gridPosition)
+        public bool IsPositionOnBoard(GridPosition gridPosition)
         {
             return IsPositionOnGrid(gridPosition) && IsTileActive(gridPosition);
         }
@@ -58,7 +66,10 @@ namespace Match3
         /// 鼠标是否在格子内
         private bool IsPositionOnGrid(GridPosition gridPosition)
         {
-            return GridMath.IsPositionOnGrid(gridPosition, _rowCount, _columnCount);
+            return gridPosition.RowIndex >= 0 &&
+                   gridPosition.RowIndex < RowCount &&
+                   gridPosition.ColumnIndex >= 0 &&
+                   gridPosition.ColumnIndex < ColumnCount;
         }
 
         /// 通过鼠标获取格子行列位置
@@ -73,14 +84,14 @@ namespace Match3
         /// 格子是否可移动
         public bool IsMovableSlot(GridPosition gridPosition)
         {
-            return GameBoard[gridPosition].IsMovable;
+            return GetGridSlot(gridPosition).HasItem;
         }
 
-        /// 获取某个位置的棋子类型
-        private TileType GetTileType(GridPosition gridPosition)
-        {
-            return (TileType)_gridTiles[gridPosition.RowIndex, gridPosition.ColumnIndex].TypeId;
-        }
+        // /// 获取某个位置的棋子类型
+        // private TileType GetTileType(GridPosition gridPosition)
+        // {
+        //     return (TileType)_gridTiles[gridPosition.RowIndex, gridPosition.ColumnIndex].TypeId;
+        // }
 
         /// 根据行列确定坐标
         public Vector3 GetWorldPosition(GridPosition gridPosition)
@@ -94,8 +105,7 @@ namespace Match3
             return new Vector3(columnIndex, rowIndex) * _tileSize + _originPosition;
         }
 
-        /// 开始排列的原点位置，从左下角开始，一行一行以此排列
-        /// 这样保证棋盘中心在 (0,0)点
+        /// 开始排列的原点位置，从左下角开始，一行一行以此排列，这样保证棋盘中心在 (0,0)点
         private Vector3 GetOriginPosition(int rowCount, int columnCount)
         {
             var offsetY = Mathf.Floor(rowCount / 2.0f) * _tileSize;
@@ -105,17 +115,17 @@ namespace Match3
         }
 
         /// 开局的时候创建所有的棋子
-        public void CreateGridTiles(TileType defaultTileType)
+        public void CreateGridTiles()
         {
             var _itemPoolComponent = World.Instance.Root.GetComponent<Game_ItemPoolComponent>();
 
-            for (var rowIndex = 0; rowIndex < _rowCount; rowIndex++)
-            for (var columnIndex = 0; columnIndex < _columnCount; columnIndex++)
+            for (var rowIndex = 0; rowIndex < RowCount; rowIndex++)
+            for (var columnIndex = 0; columnIndex < ColumnCount; columnIndex++)
             {
-                var gridTile = _itemPoolComponent.FetchTile(rowIndex, columnIndex, defaultTileType);
+                var gridTile = _itemPoolComponent.FetchTile(rowIndex, columnIndex);
 
                 _gridTiles[rowIndex, columnIndex] = gridTile;
-                _gridSlots[rowIndex, columnIndex] = new UnityGridSlot(gridTile, new GridPosition(rowIndex, columnIndex));
+                _gridSlots[rowIndex, columnIndex] = new Game_SlotComponent(gridTile, new GridPosition(rowIndex, columnIndex));
             }
         }
 
@@ -137,37 +147,36 @@ namespace Match3
         // }
 
         /// 同一个格子
-        public bool IsSameSlot(GridPosition downPosition, GridPosition slotPosition)
+        public bool IsSameSlot(GridPosition pos1, GridPosition pos2)
         {
-            return downPosition.Equals(slotPosition);
+            return pos1.Equals(pos2);
         }
 
         /// 不在一条直线上（是斜对角）
-        public bool IsDiagonalSlot(GridPosition downPosition, GridPosition slotPosition)
+        public bool IsDiagonalSlot(GridPosition pos1, GridPosition pos2)
         {
             // 当前的格子和鼠标落下时的格子在上下左右任意方向是挨着的
-            var isSideSlot = slotPosition.Equals(downPosition + GridPosition.Up) ||
-                             slotPosition.Equals(downPosition + GridPosition.Down) ||
-                             slotPosition.Equals(downPosition + GridPosition.Left) ||
-                             slotPosition.Equals(downPosition + GridPosition.Right);
+            var isSideSlot = pos1.Equals(pos2 + GridPosition.Up) ||
+                             pos1.Equals(pos2 + GridPosition.Down) ||
+                             pos1.Equals(pos2 + GridPosition.Left) ||
+                             pos1.Equals(pos2 + GridPosition.Right);
 
             return !isSideSlot;
         }
 
         /// 交换
-        public UniTask SwapItemsAsync(GridPosition position1, GridPosition position2, CancellationToken cancellationToken = default)
+        public UniTask SwapItems(GridPosition pos1, GridPosition pos2, CancellationToken cancellationToken = default)
         {
             if (_swapItemsTask?.Task.Status.IsCompleted() ?? true)
             {
-                var _riseFillStrategyComponent = World.Instance.Root.GetComponent<Game_RiseFillStrategyComponent>();
-                _swapItemsTask = SwapItemsAsync(_riseFillStrategyComponent, position1, position2, cancellationToken).ToAsyncLazy();
+                _swapItemsTask = SwapItemsAsync(pos1, pos2, cancellationToken).ToAsyncLazy();
             }
 
             return _swapItemsTask.Task;
         }
 
         /// 交换
-        private async UniTask SwapItemsAsync(Game_RiseFillStrategyComponent fillStrategyComponent, GridPosition pos1, GridPosition pos2, CancellationToken cancellationToken = default)
+        private async UniTask SwapItemsAsync(GridPosition pos1, GridPosition pos2, CancellationToken cancellationToken = default)
         {
             // 交换动画
             await SwapGameBoardItemsAsync(pos1, pos2, cancellationToken);
@@ -179,8 +188,9 @@ namespace Match3
                 NotifySequencesSolved(solvedData);
 
                 // 列消除Jobs
-                var solveJobs = fillStrategyComponent.GetSolveJobs(GameBoard, solvedData);
-                await World.Instance.Root.GetComponent<Game_JobComponent>().ExecuteJobsAsync(solveJobs, cancellationToken);
+                var fillStrategyComponent = World.Instance.Root.GetComponent<Game_RiseFillStrategyComponent>();
+                var solveJobs = fillStrategyComponent.GetSolveJobs(solvedData);
+                await World.Instance.Root.GetComponent<Game_JobComponent>().Execute(solveJobs, cancellationToken);
             }
             else
             {
@@ -192,27 +202,46 @@ namespace Match3
         /// 播放道具交换动画
         private async UniTask SwapGameBoardItemsAsync(GridPosition position1, GridPosition position2, CancellationToken cancellationToken = default)
         {
-            var gridSlot1 = GameBoard[position1.RowIndex, position1.ColumnIndex];
-            var gridSlot2 = GameBoard[position2.RowIndex, position2.ColumnIndex];
+            var gridSlot1 = GetGridSlot(position1);
+            var gridSlot2 = GetGridSlot(position2);
 
             var animatedItemSwapperComponent = World.Instance.Root.GetComponent<Game_AnimatedItemSwapperComponent>();
             await animatedItemSwapperComponent.SwapItemsAsync(gridSlot1, gridSlot2, cancellationToken);
         }
 
-        // /// 执行Jobs
-        // public UniTask ExecuteJobsAsync(IEnumerable<IJob> jobs, CancellationToken cancellationToken = default)
-        // {
-        //     return JobsExecutor.ExecuteJobsAsync(jobs, cancellationToken);
-        // }
-
         /// 是否成功消除
         private bool IsSolved(GridPosition position1, GridPosition position2, out SolvedData solvedData)
         {
             var solveComponent = World.Instance.Root.GetComponent<Game_SolveComponent>();
-            solvedData = solveComponent.Swap(GameBoard, position1, position2);
+            solvedData = solveComponent.Swap(position1, position2);
 
             // 至少要有一个可被消除的序列
             return solvedData.SolvedSequences.Count > 0;
+        }
+
+        /// 能否向上移动
+        public bool CanMoveUp(Game_SlotComponent gridSlotComponent, out GridPosition gridPosition)
+        {
+            // 如果该位置上方一个位置为空（被消除了），那么就可以上移
+            var topGridSlot = GetSideGridSlot(gridSlotComponent, GridPosition.Up);
+            if (topGridSlot is { HasItem: false })
+            {
+                gridPosition = topGridSlot.GridPosition;
+                return true;
+            }
+
+            gridPosition = GridPosition.Zero;
+            return false;
+        }
+
+        /// 获取某格子相邻的某方向的临格
+        private Game_SlotComponent GetSideGridSlot(Game_SlotComponent gridSlotComponent, GridPosition direction)
+        {
+            var sideGridSlotPosition = gridSlotComponent.GridPosition + direction;
+
+            return IsPositionOnGrid(sideGridSlotPosition)
+                ? GetGridSlot(sideGridSlotPosition)
+                : null;
         }
 
         /// 序列消除时

@@ -10,9 +10,9 @@ namespace Match3
     {
         private const float ScaleDuration = 0.5f;
 
-        private readonly IEnumerable<UnityItem> _items;
+        private readonly IEnumerable<Game_ItemComponent> _items;
 
-        public ItemsShowJob(IEnumerable<UnityItem> items, int executionOrder = 0) : base(executionOrder)
+        public ItemsShowJob(IEnumerable<Game_ItemComponent> items, int executionOrder = 0) : base(executionOrder)
         {
             _items = items;
         }

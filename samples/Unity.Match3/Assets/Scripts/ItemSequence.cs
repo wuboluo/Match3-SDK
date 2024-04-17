@@ -5,7 +5,7 @@ namespace Match3
 {
     public class ItemSequence
     {
-        public ItemSequence(Type sequenceDetectorType, IReadOnlyList<UnityGridSlot> solvedGridSlots)
+        public ItemSequence(Type sequenceDetectorType, IReadOnlyList<Game_SlotComponent> solvedGridSlots)
         {
             SequenceDetectorType = sequenceDetectorType;
             SolvedGridSlots = solvedGridSlots;
@@ -15,6 +15,6 @@ namespace Match3
         public Type SequenceDetectorType { get; }
 
         // 消除的格子集合
-        public IReadOnlyList<UnityGridSlot> SolvedGridSlots { get; }
+        public IReadOnlyList<Game_SlotComponent> SolvedGridSlots { get; }
     }
 }

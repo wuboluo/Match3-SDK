@@ -9,10 +9,10 @@ namespace Match3
     {
         private const float SwapDuration = 0.2f;
 
-        public async UniTask SwapItemsAsync(UnityGridSlot gridSlot1, UnityGridSlot gridSlot2, CancellationToken cancellationToken = default)
+        public async UniTask SwapItemsAsync(Game_SlotComponent gridSlot1, Game_SlotComponent gridSlot2, CancellationToken cancellationToken = default)
         {
-            var item1 = gridSlot1.Item;
-            var item2 = gridSlot2.Item;
+            var item1 = gridSlot1.ItemComponent;
+            var item2 = gridSlot2.ItemComponent;
 
             var item1WorldPosition = item1.GetWorldPosition();
             var item2WorldPosition = item2.GetWorldPosition();

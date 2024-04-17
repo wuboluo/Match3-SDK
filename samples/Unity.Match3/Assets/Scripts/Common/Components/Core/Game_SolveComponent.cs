@@ -13,28 +13,28 @@ namespace Match3
         private readonly ILineDetect[] _dirSequenceDetectors;
 
         // 特殊道具检测器
-        private readonly ISpecialItemDetector[] _specialItemDetectors;
+        private readonly ISpecialDetect[] _specialItemDetectors;
 
-        public Game_SolveComponent(ILineDetect[] dirSequenceDetectors, ISpecialItemDetector[] specialItemDetectors)
+        public Game_SolveComponent(ILineDetect[] dirSequenceDetectors, ISpecialDetect[] specialItemDetectors)
         {
             _dirSequenceDetectors = dirSequenceDetectors;
             _specialItemDetectors = specialItemDetectors;
         }
 
         /// 消除
-        public SolvedData Swap(GameBoard gameBoard, params GridPosition[] gridPositions)
+        public SolvedData Swap(params GridPosition[] gridPositions)
         {
             Debug.Log("交换");
 
             var resultSequences = new Collection<ItemSequence>();
-            var specialItemGridSlots = new HashSet<UnityGridSlot>();
+            var specialItemGridSlots = new HashSet<Game_SlotComponent>();
 
             foreach (var gridPosition in gridPositions)
             {
                 // 横向 纵向
                 foreach (var dirSeqDetector in _dirSequenceDetectors)
                 {
-                    var sequence = dirSeqDetector.GetSequence(gameBoard, gridPosition);
+                    var sequence = dirSeqDetector.GetSequence(gridPosition);
                     if (sequence == null)
                     {
                         // 不足3个时返回null
@@ -49,7 +49,7 @@ namespace Match3
                     // todo 
                     if (_specialItemDetectors != null)
                     {
-                        foreach (var specialItemGridSlot in GetSpecialItemGridSlots(gameBoard, sequence))
+                        foreach (var specialItemGridSlot in GetSpecialItemGridSlots(sequence))
                         {
                             specialItemGridSlots.Add(specialItemGridSlot);
                         }
@@ -72,15 +72,12 @@ namespace Match3
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private IEnumerable<UnityGridSlot> GetSpecialItemGridSlots(GameBoard gameBoard, ItemSequence sequence)
+        private IEnumerable<Game_SlotComponent> GetSpecialItemGridSlots(ItemSequence sequence)
         {
             foreach (var itemDetector in _specialItemDetectors)
             foreach (var solvedGridSlot in sequence.SolvedGridSlots)
-            foreach (var specialItemGridSlot in itemDetector.GetSpecialItemGridSlots(gameBoard, solvedGridSlot))
+            foreach (var specialItemGridSlot in itemDetector.GetSpecialItemGridSlots(solvedGridSlot))
             {
-                var hasNextState = ((IStatefulSlot)specialItemGridSlot.State).NextState();
-                if (hasNextState) continue;
-
                 yield return specialItemGridSlot;
             }
         }

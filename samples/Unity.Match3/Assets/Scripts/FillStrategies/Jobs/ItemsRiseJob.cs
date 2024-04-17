@@ -29,7 +29,7 @@ namespace Match3
             {
                 var itemMoveTween = CreateItemMoveTween(itemData);
                 _ = itemsSequence
-                    .Join(CreateItemFadeInTween(itemData.Item))
+                    .Join(CreateItemFadeInTween(itemData.ItemComponent))
                     .Join(itemMoveTween).PrependInterval(itemMoveTween.Duration() * IntervalDuration);
             }
 
@@ -40,13 +40,13 @@ namespace Match3
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private Tween CreateItemFadeInTween(UnityItem item)
+        private Tween CreateItemFadeInTween(Game_ItemComponent itemComponent)
         {
-            item.SpriteRenderer.SetAlpha(0);
-            item.SetScale(1);
-            item.Show();
+            itemComponent.SpriteRenderer.SetAlpha(0);
+            itemComponent.SetScale(1);
+            itemComponent.Show();
 
-            return item.SpriteRenderer.DOFade(1, FadeDuration);
+            return itemComponent.SpriteRenderer.DOFade(1, FadeDuration);
         }
     }
 }

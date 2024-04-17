@@ -25,7 +25,7 @@
         /// 道具池组件
         private Game_ItemPoolComponent New_Game_ItemPoolComponent()
         {
-            return new Game_ItemPoolComponent(data.tileModels, data.transform);
+            return new Game_ItemPoolComponent(data.itemPrefab, data.transform);
         }
 
         /// 道具生成组件
@@ -56,7 +56,7 @@
             }
 
             // 特殊消除器
-            ISpecialItemDetector[] GetSpecialItemDetectors()
+            ISpecialDetect[] GetSpecialItemDetectors()
             {
                 return null;
             }

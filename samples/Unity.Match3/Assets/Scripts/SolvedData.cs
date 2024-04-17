@@ -4,7 +4,7 @@ namespace Match3
 {
     public class SolvedData
     {
-        public SolvedData(IReadOnlyCollection<ItemSequence> solvedSequences, IReadOnlyCollection<UnityGridSlot> specialItemGridSlots)
+        public SolvedData(IReadOnlyCollection<ItemSequence> solvedSequences, IReadOnlyCollection<Game_SlotComponent> specialItemGridSlots)
         {
             SolvedSequences = solvedSequences;
             SpecialItemGridSlots = specialItemGridSlots;
@@ -14,14 +14,14 @@ namespace Match3
         public IReadOnlyCollection<ItemSequence> SolvedSequences { get; }
 
         /// 被特殊消除掉的格子集合
-        public IReadOnlyCollection<UnityGridSlot> SpecialItemGridSlots { get; }
+        public IReadOnlyCollection<Game_SlotComponent> SpecialItemGridSlots { get; }
 
-        public IEnumerable<UnityGridSlot> GetSolvedGridSlots(bool onlyMovable = false)
+        public IEnumerable<Game_SlotComponent> GetSolvedGridSlots(bool onlyMovable = false)
         {
             foreach (var sequence in SolvedSequences)
             foreach (var solvedGridSlot in sequence.SolvedGridSlots)
             {
-                if (onlyMovable && !solvedGridSlot.IsMovable)
+                if (onlyMovable && !solvedGridSlot.HasItem)
                 {
                     continue;
                 }
@@ -30,7 +30,7 @@ namespace Match3
             }
         }
 
-        public IEnumerable<UnityGridSlot> GetSpecialItemGridSlots(bool excludeOccupied = false)
+        public IEnumerable<Game_SlotComponent> GetSpecialItemGridSlots(bool excludeOccupied = false)
         {
             foreach (var specialItemGridSlot in SpecialItemGridSlots)
             {

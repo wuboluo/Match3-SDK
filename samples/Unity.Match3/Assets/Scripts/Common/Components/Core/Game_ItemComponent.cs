@@ -2,19 +2,16 @@ using UnityEngine;
 
 namespace Match3
 {
-    public class UnityItem : MonoBehaviour
+    [RequireComponent(typeof(SpriteRenderer))]
+    public class Game_ItemComponent : MonoBehaviour
     {
-        [SerializeField] private SpriteRenderer _spriteRenderer;
-
-        private bool _isDestroyed;
-
         public int ContentId { get; private set; }
+        public SpriteRenderer SpriteRenderer { get; private set; }
         public Transform Transform => transform;
-        public SpriteRenderer SpriteRenderer => _spriteRenderer;
 
-        private void OnDestroy()
+        private void Awake()
         {
-            _isDestroyed = true;
+            SpriteRenderer = GetComponent<SpriteRenderer>();
         }
 
         public void Show()
@@ -30,7 +27,7 @@ namespace Match3
         public void SetSprite(int spriteId, Sprite sprite)
         {
             ContentId = spriteId;
-            _spriteRenderer.sprite = sprite;
+            SpriteRenderer.sprite = sprite;
         }
 
         public void SetWorldPosition(Vector3 worldPosition)
@@ -45,12 +42,7 @@ namespace Match3
 
         public void SetScale(float value)
         {
-            transform.localScale = new Vector3(value, value, value);
-        }
-
-        public void Dispose()
-        {
-            if (_isDestroyed == false) Destroy(gameObject);
+            transform.localScale = new Vector3(value, value, 1);
         }
     }
 }

@@ -14,7 +14,7 @@ namespace Match3
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         protected static Tween CreateItemMoveTween(ItemMoveData data)
         {
-            return data.Item.Transform.DOPath(data.WorldPositions, MoveDuration);
+            return data.ItemComponent.Transform.DOPath(data.WorldPositions, MoveDuration);
         }
     }
 }

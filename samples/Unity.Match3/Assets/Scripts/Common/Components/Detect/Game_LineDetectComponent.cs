@@ -6,16 +6,18 @@ namespace Match3
     public class Game_LineDetectComponent : Component
     {
         /// 按方向获取序列
-        public ItemSequence GetSequenceByDirection(GameBoard gameBoard, GridPosition gridPosition, IEnumerable<GridPosition> directions)
+        public ItemSequence GetSequenceByDirection(GridPosition gridPosition, IEnumerable<GridPosition> directions)
         {
+            var boardComponent = World.Instance.Root.GetComponent<Game_BoardComponent>();
+
             // 被消除的格子集合
-            var solvedSlots = new List<UnityGridSlot>();
-            var gridSlot = gameBoard[gridPosition];
+            var solvedSlots = new List<Game_SlotComponent>();
+            var gridSlot = boardComponent.GetGridSlot(gridPosition);
 
             // direction：上下or左右
             foreach (var direction in directions)
             {
-                var slots = GetSequenceOfGridSlots(gameBoard, gridSlot, gridPosition, direction);
+                var slots = GetSequenceOfGridSlots(gridSlot, gridPosition, direction);
                 solvedSlots.AddRange(slots);
             }
 
@@ -36,19 +38,21 @@ namespace Match3
         }
 
         /// 获取格子序列
-        private static IEnumerable<UnityGridSlot> GetSequenceOfGridSlots(GameBoard gameBoard, UnityGridSlot gridSlot, GridPosition gridPosition, GridPosition direction)
+        private static IEnumerable<Game_SlotComponent> GetSequenceOfGridSlots(Game_SlotComponent gridSlotComponent, GridPosition gridPosition, GridPosition direction)
         {
+            var boardComponent = World.Instance.Root.GetComponent<Game_BoardComponent>();
+
             var newPosition = gridPosition + direction;
-            var slotsSequence = new List<UnityGridSlot>();
+            var slotsSequence = new List<Game_SlotComponent>();
 
             // 不出界的范围，依次检查
-            while (gameBoard.IsPositionOnBoard(newPosition))
+            while (boardComponent.IsPositionOnBoard(newPosition))
             {
-                var currentSlot = gameBoard[newPosition];
-                if (currentSlot.HasItem == false) break;
+                var currentSlot = boardComponent.GetGridSlot(newPosition);
+                if (!currentSlot.HasItem) break;
 
                 // 如果是同一种类型，记录这个并准备检查后面的
-                if (currentSlot.ItemId == gridSlot.ItemId)
+                if (currentSlot.ItemId == gridSlotComponent.ItemId)
                 {
                     newPosition += direction;
                     slotsSequence.Add(currentSlot);

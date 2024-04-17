@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Match3
 {
@@ -9,6 +10,8 @@ namespace Match3
         private Game_RiseFillStrategyComponent _riseFillStrategyComponent;
         private Game_JobComponent _jobComponent;
 
+        public Button startBtn;
+
         private void Start()
         {
             _boardComponent = World.Instance.Root.GetComponent<Game_BoardComponent>();
@@ -16,20 +19,20 @@ namespace Match3
             _riseFillStrategyComponent = World.Instance.Root.GetComponent<Game_RiseFillStrategyComponent>();
             _jobComponent = World.Instance.Root.GetComponent<Game_JobComponent>();
 
-            StartGame();
+            startBtn.onClick.AddListener(StartGame);
         }
 
         private void StartGame()
         {
             // 绘制棋盘尺寸
-            _boardComponent.CreateGridTiles(TileType.Available);
+            _boardComponent.CreateGridTiles();
 
             // 初始化道具池，创建道具
             _itemGenerateComponent.CreateBoardItems(_boardComponent.GetGridSlots());
 
             // 填充棋盘
-            var boardFillJobs = _riseFillStrategyComponent.GetBoardFillJobs(_boardComponent.GameBoard);
-            _jobComponent.ExecuteJobsAsync(boardFillJobs);
+            var boardFillJobs = _riseFillStrategyComponent.GetBoardFillJobs();
+            _jobComponent.Execute(boardFillJobs);
 
             Debug.Log("游戏开始");
         }

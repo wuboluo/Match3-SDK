@@ -23,7 +23,7 @@ namespace Match3
             var stringBuilder = new StringBuilder();
 
             var detectorType = sequence.SequenceDetectorType.Name.Contains("Ver") ? "纵向" : "横向";
-            stringBuilder.Append($"棋子种类：<color=yellow>{sequence.SolvedGridSlots[0].Item.ContentId}</color>");
+            stringBuilder.Append($"棋子种类：<color=yellow>{sequence.SolvedGridSlots[0].ItemComponent.ContentId}</color>");
             stringBuilder.Append("  |  ");
             stringBuilder.Append($"方向：<color=yellow>{detectorType}</color>");
             stringBuilder.Append("  |  ");

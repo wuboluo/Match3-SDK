@@ -4,13 +4,13 @@ namespace Match3
 {
     public class ItemMoveData
     {
-        public ItemMoveData(UnityItem item, Vector3[] worldPositions)
+        public ItemMoveData(Game_ItemComponent itemComponent, Vector3[] worldPositions)
         {
-            Item = item;
+            ItemComponent = itemComponent;
             WorldPositions = worldPositions;
         }
 
-        public UnityItem Item { get; }
+        public Game_ItemComponent ItemComponent { get; }
         public Vector3[] WorldPositions { get; }
     }
 }

@@ -45,7 +45,7 @@ namespace Match3
             }
 
             // 是同一个格子 or 不在一条直线上
-            if (_boardComponent.IsSameSlot(_downPosition, slotPosition) 
+            if (_boardComponent.IsSameSlot(_downPosition, slotPosition)
                 || _boardComponent.IsDiagonalSlot(_downPosition, slotPosition))
             {
                 return;
@@ -54,7 +54,7 @@ namespace Match3
             _isDrag = false;
 
             // 鼠标落下的位置和当前位置交换 todo 是不是要在up的时候交换
-            _boardComponent.SwapItemsAsync(_downPosition, slotPosition).Forget();
+            _boardComponent.SwapItems(_downPosition, slotPosition).Forget();
         }
     }
 }

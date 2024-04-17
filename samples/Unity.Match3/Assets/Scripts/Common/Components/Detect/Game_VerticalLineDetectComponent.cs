@@ -11,9 +11,9 @@ namespace Match3
             AddComponent(new Game_LineDetectComponent());
         }
 
-        public ItemSequence GetSequence(GameBoard gameBoard, GridPosition gridPosition)
+        public ItemSequence GetSequence(GridPosition gridPosition)
         {
-            return GetComponent<Game_LineDetectComponent>().GetSequenceByDirection(gameBoard, gridPosition, _lineDirections);
+            return GetComponent<Game_LineDetectComponent>().GetSequenceByDirection(gridPosition, _lineDirections);
         }
     }
 }

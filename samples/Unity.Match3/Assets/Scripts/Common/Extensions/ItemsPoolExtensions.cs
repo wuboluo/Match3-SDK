@@ -4,15 +4,15 @@ namespace Match3
 {
     public static class ItemsPoolExtensions
     {
-        public static void ReturnAllItems(this Game_ItemGenerateComponent itemsPool, IEnumerable<UnityGridSlot> gridSlots)
+        public static void ReturnAllItems(this Game_ItemGenerateComponent itemsPool, IEnumerable<Game_SlotComponent> gridSlots)
         {
             foreach (var gridSlot in gridSlots)
             {
-                if (gridSlot.Item == null) continue;
+                if (gridSlot.ItemComponent == null) continue;
 
-                itemsPool.RecycleItem(gridSlot.Item);
-                gridSlot.Item.Hide();
-                gridSlot.Clear();
+                itemsPool.RecycleItem(gridSlot.ItemComponent);
+                gridSlot.ItemComponent.Hide();
+                gridSlot.Dispose();
             }
         }
     }
