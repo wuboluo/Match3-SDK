@@ -6,13 +6,13 @@ using UnityEngine;
 
 namespace Match3
 {
-    public class ItemsShowJob : Job
+    public class Job_ShowAllItems : Job
     {
         private const float ScaleDuration = 0.5f;
 
         private readonly IEnumerable<Game_ItemComponent> _items;
 
-        public ItemsShowJob(IEnumerable<Game_ItemComponent> items, int executionOrder = 0) : base(executionOrder)
+        public Job_ShowAllItems(IEnumerable<Game_ItemComponent> items, int executionOrder = 0) : base(executionOrder)
         {
             _items = items;
         }

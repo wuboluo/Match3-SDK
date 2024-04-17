@@ -2,9 +2,8 @@ namespace Match3
 {
     public class Game_SlotComponent : Component
     {
-        public Game_SlotComponent(Game_ItemComponent itemComponent, GridPosition gridPosition)
+        public Game_SlotComponent(GridPosition gridPosition)
         {
-            ItemComponent = itemComponent;
             GridPosition = gridPosition;
         }
 

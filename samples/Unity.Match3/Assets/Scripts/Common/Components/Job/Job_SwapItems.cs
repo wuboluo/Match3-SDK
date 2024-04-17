@@ -5,14 +5,23 @@ using DG.Tweening;
 namespace Match3
 {
     /// 道具交换动画
-    public class Game_AnimatedItemSwapperComponent : Component
+    public class Job_SwapItems : Job
     {
         private const float SwapDuration = 0.2f;
 
-        public async UniTask SwapItemsAsync(Game_SlotComponent gridSlot1, Game_SlotComponent gridSlot2, CancellationToken cancellationToken = default)
+        private readonly Game_SlotComponent _slotComponent1;
+        private readonly Game_SlotComponent _slotComponent2;
+
+        public Job_SwapItems(Game_SlotComponent slotComponent1, Game_SlotComponent slotComponent2, int executionOrder = 0) : base(executionOrder)
         {
-            var item1 = gridSlot1.ItemComponent;
-            var item2 = gridSlot2.ItemComponent;
+            _slotComponent1 = slotComponent1;
+            _slotComponent2 = slotComponent2;
+        }
+
+        public override async UniTask ExecuteAsync(CancellationToken cancellationToken = default)
+        {
+            var item1 = _slotComponent1.ItemComponent;
+            var item2 = _slotComponent2.ItemComponent;
 
             var item1WorldPosition = item1.GetWorldPosition();
             var item2WorldPosition = item2.GetWorldPosition();
@@ -26,8 +35,8 @@ namespace Match3
             item1.SetWorldPosition(item2WorldPosition);
             item2.SetWorldPosition(item1WorldPosition);
 
-            gridSlot1.SetItem(item2);
-            gridSlot2.SetItem(item1);
+            _slotComponent1.SetItem(item2);
+            _slotComponent2.SetItem(item1);
         }
     }
 }

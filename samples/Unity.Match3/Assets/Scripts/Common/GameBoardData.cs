@@ -12,6 +12,5 @@ namespace Match3
         [Space]
         public GameObject itemPrefab;
         public SpriteAtlas artAtlas;
-        public Transform itemsPool;
     }
 }

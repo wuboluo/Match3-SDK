@@ -8,10 +8,8 @@ namespace Match3
     public class Game_BoardComponent : Component
     {
         private readonly float _tileSize;
-        private readonly Game_ItemComponent[,] _gridTiles;
-        private readonly Game_SlotComponent[,] _gridSlots;
         private readonly Vector3 _originPosition;
-
+        private Game_SlotComponent[,] _gridSlots;
         private AsyncLazy _swapItemsTask;
 
         public Game_BoardComponent(int rowCount, int columnCount, float tileSize)
@@ -20,9 +18,8 @@ namespace Match3
             ColumnCount = columnCount;
 
             _tileSize = tileSize;
-            _gridTiles = new Game_ItemComponent[rowCount, columnCount];
-            _gridSlots = new Game_SlotComponent[rowCount, columnCount];
             _originPosition = GetOriginPosition(rowCount, columnCount);
+            CreateSlots();
         }
 
         public int RowCount { get; }
@@ -43,28 +40,26 @@ namespace Match3
             return _gridSlots;
         }
 
-        /// 某个位置的棋子是否已启用
-        private bool IsTileActive(GridPosition gridPosition)
+        private void CreateSlots()
         {
-            return true;
-            // return GetTileType(gridPosition) != TileType.Unavailable;
+            _gridSlots = new Game_SlotComponent[RowCount, ColumnCount];
+
+            for (var rowIndex = 0; rowIndex < RowCount; rowIndex++)
+            for (var columnIndex = 0; columnIndex < ColumnCount; columnIndex++)
+            {
+                _gridSlots[rowIndex, columnIndex] = new Game_SlotComponent(new GridPosition(rowIndex, columnIndex));
+            }
         }
 
         /// 鼠标是否在棋盘内，如果在就返回所在的格子位置
         public bool IsPointerOnBoard(Vector3 worldPointerPosition, out GridPosition gridPosition)
         {
             gridPosition = GetGridPositionByPointer(worldPointerPosition);
-            return IsPositionOnBoard(gridPosition);
-        }
-
-        /// 鼠标是否在格子内 and 此格子可操作
-        public bool IsPositionOnBoard(GridPosition gridPosition)
-        {
-            return IsPositionOnGrid(gridPosition) && IsTileActive(gridPosition);
+            return IsPositionOnGrid(gridPosition);
         }
 
         /// 鼠标是否在格子内
-        private bool IsPositionOnGrid(GridPosition gridPosition)
+        public bool IsPositionOnGrid(GridPosition gridPosition)
         {
             return gridPosition.RowIndex >= 0 &&
                    gridPosition.RowIndex < RowCount &&
@@ -113,38 +108,6 @@ namespace Match3
 
             return new Vector3(-offsetX, -offsetY);
         }
-
-        /// 开局的时候创建所有的棋子
-        public void CreateGridTiles()
-        {
-            var _itemPoolComponent = World.Instance.Root.GetComponent<Game_ItemPoolComponent>();
-
-            for (var rowIndex = 0; rowIndex < RowCount; rowIndex++)
-            for (var columnIndex = 0; columnIndex < ColumnCount; columnIndex++)
-            {
-                var gridTile = _itemPoolComponent.FetchTile(rowIndex, columnIndex);
-
-                _gridTiles[rowIndex, columnIndex] = gridTile;
-                _gridSlots[rowIndex, columnIndex] = new Game_SlotComponent(gridTile, new GridPosition(rowIndex, columnIndex));
-            }
-        }
-
-        // /// 设置某行列的棋子
-        // private void SetTile(int rowIndex, int columnIndex, TileType type)
-        // {
-        //     // 把这个位置原来的棋子回收，如果有的话
-        //     var currentTile = _gridTiles[rowIndex, columnIndex];
-        //     if (currentTile != null)
-        //     {
-        //         var itemPoolComponent = World.Instance.Root.GetComponent<Game_ItemPoolComponent>();
-        //         itemPoolComponent.RecycleTile(currentTile);
-        //     }
-        //
-        //     // 再取一个新的放在这个位置
-        //     var gridTile = GetTileFromPool(rowIndex, columnIndex, type);
-        //     _gridTiles[rowIndex, columnIndex] = gridTile;
-        //     _gridSlots[rowIndex, columnIndex].SetState(gridTile);
-        // }
 
         /// 同一个格子
         public bool IsSameSlot(GridPosition pos1, GridPosition pos2)
@@ -202,11 +165,13 @@ namespace Match3
         /// 播放道具交换动画
         private async UniTask SwapGameBoardItemsAsync(GridPosition position1, GridPosition position2, CancellationToken cancellationToken = default)
         {
-            var gridSlot1 = GetGridSlot(position1);
-            var gridSlot2 = GetGridSlot(position2);
+            var slotComponent1 = GetGridSlot(position1);
+            var slotComponent2 = GetGridSlot(position2);
 
-            var animatedItemSwapperComponent = World.Instance.Root.GetComponent<Game_AnimatedItemSwapperComponent>();
-            await animatedItemSwapperComponent.SwapItemsAsync(gridSlot1, gridSlot2, cancellationToken);
+            // 交换Jobs
+            var swapJobs = new[] { new Job_SwapItems(slotComponent1, slotComponent2) };
+            var jobComponent = World.Instance.Root.GetComponent<Game_JobComponent>();
+            await jobComponent.Execute(swapJobs, cancellationToken);
         }
 
         /// 是否成功消除

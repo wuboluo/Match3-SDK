@@ -6,7 +6,7 @@ namespace Match3
 
         private readonly Game_BoardComponent _boardComponent;
         private readonly Game_RiseFillStrategyComponent _riseFillStrategyComponent;
-        private readonly Game_AnimatedItemSwapperComponent _animatedItemSwapperComponent;
+        private readonly Job_SwapItems _animatedItems;
 
         private bool _isDrag;
         private GridPosition _slotDownPosition;

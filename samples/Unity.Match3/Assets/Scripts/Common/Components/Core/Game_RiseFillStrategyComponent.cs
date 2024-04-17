@@ -7,37 +7,33 @@ namespace Match3
     /// 同列上升填充策略组件
     public class Game_RiseFillStrategyComponent : Component
     {
-        private readonly Game_ItemGenerateComponent _itemGenerateComponent;
+        private readonly Game_ItemPoolComponent _itemPoolComponent;
         private readonly Game_BoardComponent _boardComponent;
 
         public Game_RiseFillStrategyComponent()
         {
-            _itemGenerateComponent = World.Instance.Root.GetComponent<Game_ItemGenerateComponent>();
+            _itemPoolComponent = World.Instance.Root.GetComponent<Game_ItemPoolComponent>();
             _boardComponent = World.Instance.Root.GetComponent<Game_BoardComponent>();
         }
 
         /// 棋盘填充Jobs
         public IEnumerable<IJob> GetBoardFillJobs()
         {
-            // todo 要不要换个地方写
-            // gameBoard.SetGridSlots(_gridSlots);
-
             var itemsToShow = new List<Game_ItemComponent>();
 
             for (var rowIndex = 0; rowIndex < _boardComponent.RowCount; rowIndex++)
             for (var columnIndex = 0; columnIndex < _boardComponent.ColumnCount; columnIndex++)
             {
-                var gridSlot = _boardComponent.GetGridSlot(rowIndex, columnIndex);
-                if (!gridSlot.HasItem) continue;
+                var slotComponent = _boardComponent.GetGridSlot(rowIndex, columnIndex);
 
-                var item = FetchItemFromPool();
-                item.SetWorldPosition(GetWorldPosition(gridSlot.GridPosition));
+                var itemComponent = FetchItemFromPool();
+                itemComponent.SetWorldPosition(GetWorldPosition(slotComponent.GridPosition));
+                slotComponent.SetItem(itemComponent);
 
-                gridSlot.SetItem(item);
-                itemsToShow.Add(item);
+                itemsToShow.Add(itemComponent);
             }
 
-            return new[] { new ItemsShowJob(itemsToShow) };
+            return new[] { new Job_ShowAllItems(itemsToShow) };
         }
 
         /// 列填充Jobs
@@ -77,7 +73,7 @@ namespace Match3
                 // 如果此列存在需要移动的格子
                 if (itemsRiseData.Count > 0)
                 {
-                    jobs.Add(new ItemsRiseJob(itemsRiseData, delayMultiplier: 1));
+                    jobs.Add(new Job_RiseItems(itemsRiseData, delayMultiplier: 1));
                 }
             }
 
@@ -88,42 +84,48 @@ namespace Match3
         public IEnumerable<IJob> GetSolveJobs(SolvedData solvedData)
         {
             var jobs = new List<IJob>();
-            var itemsToHide = new List<Game_ItemComponent>();
-            var solvedGridSlots = new HashSet<Game_SlotComponent>();
+            var hideItemComponents = new List<Game_ItemComponent>();
+            var solvedSlotComponents = new HashSet<Game_SlotComponent>();
 
             // 记录序列中消除的棋子
-            foreach (var solvedGridSlot in solvedData.GetSolvedGridSlots())
+            foreach (var slotComponent in solvedData.GetSolvedGridSlots())
             {
-                if (!solvedGridSlot.HasItem) continue;
+                if (!slotComponent.HasItem)
+                {
+                    continue;
+                }
 
                 // 用hashSet是为了可以在TL型过滤掉共用的棋子
-                if (!solvedGridSlots.Add(solvedGridSlot)) continue;
+                if (!solvedSlotComponents.Add(slotComponent))
+                {
+                    continue;
+                }
 
-                var currentItem = solvedGridSlot.ItemComponent;
-                itemsToHide.Add(currentItem);
-                solvedGridSlot.Dispose();
+                var item = slotComponent.ItemComponent;
+                hideItemComponents.Add(item);
 
-                RecycleItemToPool(currentItem);
+                slotComponent.Dispose();
+                // RecycleItemToPool(item);
             }
 
             // 被特殊消除的棋子
             foreach (var specialItemGridSlot in solvedData.GetSpecialItemGridSlots())
             {
-                solvedGridSlots.Add(specialItemGridSlot);
+                solvedSlotComponents.Add(specialItemGridSlot);
             }
 
-            foreach (var solvedGridSlot in solvedGridSlots)
+            foreach (var solvedGridSlot in solvedSlotComponents)
             {
                 var itemsMoveData = GetItemsMoveData(solvedGridSlot.GridPosition.ColumnIndex);
                 if (itemsMoveData.Count != 0)
                 {
                     // 道具移动Job
-                    jobs.Add(new ItemsMoveJob(itemsMoveData));
+                    jobs.Add(new Job_MoveItems(itemsMoveData));
                 }
             }
 
-            solvedGridSlots.Clear();
-            jobs.Add(new ItemsHideJob(itemsToHide));
+            solvedSlotComponents.Clear();
+            jobs.Add(new Job_HideItems(hideItemComponents));
             jobs.AddRange(GetFillJobs());
 
             return jobs;
@@ -138,20 +140,20 @@ namespace Match3
             for (var rowIndex = _boardComponent.RowCount - 1; rowIndex >= 0; rowIndex--)
             {
                 // 每行中指定列的格子
-                var gridSlot = _boardComponent.GetGridSlot(rowIndex, columnIndex);
-                if (!gridSlot.HasItem)
+                var slotComponent = _boardComponent.GetGridSlot(rowIndex, columnIndex);
+                if (!slotComponent.HasItem)
                 {
                     continue;
                 }
 
                 // 这个格子能否向上移动
-                if (!CanRise(gridSlot, out var destinationGridPosition))
+                if (!CanRise(slotComponent, out var destinationGridPosition))
                 {
                     continue;
                 }
 
-                var item = gridSlot.ItemComponent;
-                gridSlot.Dispose();
+                var item = slotComponent.ItemComponent;
+                slotComponent.Dispose();
                 itemsRiseData.Add(new ItemMoveData(item, new[] { GetWorldPosition(destinationGridPosition) }));
                 _boardComponent.GetGridSlot(destinationGridPosition).SetItem(item);
             }
@@ -202,13 +204,13 @@ namespace Match3
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private Game_ItemComponent FetchItemFromPool()
         {
-            return _itemGenerateComponent.FetchItem();
+            return _itemPoolComponent.FetchTileItem();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void RecycleItemToPool(Game_ItemComponent itemComponent)
         {
-            _itemGenerateComponent.RecycleItem(itemComponent);
+            _itemPoolComponent.RecycleTileItem(itemComponent);
         }
     }
 }

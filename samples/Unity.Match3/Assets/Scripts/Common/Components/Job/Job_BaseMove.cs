@@ -3,11 +3,11 @@ using DG.Tweening;
 
 namespace Match3
 {
-    public abstract class MoveJob : Job
+    public abstract class Job_BaseMove : Job
     {
         private const float MoveDuration = 0.25f;
 
-        protected MoveJob(int executionOrder) : base(executionOrder)
+        protected Job_BaseMove(int executionOrder) : base(executionOrder)
         {
         }
 

@@ -46,7 +46,7 @@ namespace Match3
             var slotsSequence = new List<Game_SlotComponent>();
 
             // 不出界的范围，依次检查
-            while (boardComponent.IsPositionOnBoard(newPosition))
+            while (boardComponent.IsPositionOnGrid(newPosition))
             {
                 var currentSlot = boardComponent.GetGridSlot(newPosition);
                 if (!currentSlot.HasItem) break;

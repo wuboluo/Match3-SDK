@@ -5,70 +5,52 @@ namespace Match3
 {
     public class Game_ItemPoolComponent : Component
     {
-        // tile gameObject 父节点
         private readonly Transform _itemsParent;
-
-        // 每种tile的池
-        private readonly Queue<Game_ItemComponent> _itemsPool;
-        // private readonly Dictionary<TileType, Queue<IGridTile>> _itemsPool;
-
-        // 每种tile的prefab
-        private readonly GameObject _tilePrefab;
-        // private readonly Dictionary<TileType, GameObject> _tilePrefabs;
+        private readonly GameObject _itemPrefab;
+        private readonly Queue<Game_ItemComponent> _itemPool;
 
         public Game_ItemPoolComponent(GameObject itemPrefab, Transform itemsParent)
         {
             _itemsParent = itemsParent;
-            _itemsPool = new Queue<Game_ItemComponent>();
-            _tilePrefab = itemPrefab;
-
-            // _itemsPool = new Dictionary<TileType, Queue<IGridTile>>(tiles.Length);
-            // _tilePrefabs = new Dictionary<TileType, GameObject>(tiles.Length);
-
-            // 创建所有tile类型的池
-            // foreach (var tile in tiles)
-            // {
-            //     // _tilePrefabs.Add(tile.Type, tile.Prefab);
-            //     _itemsPool.Add(tile.Type, new Queue<IGridTile>());
-            // }
+            _itemPrefab = itemPrefab;
+            _itemPool = new Queue<Game_ItemComponent>();
+            InitPool();
         }
 
-        // 从池中拿一个指定类型的 tile gameObject
-        private Game_ItemComponent FetchTile()
+        private void InitPool()
         {
-            var gridTile = _itemsPool.Count == 0 ? NewTile() : _itemsPool.Dequeue();
+            var rowCount = World.Instance.data.rowCount;
+            var columnCount = World.Instance.data.columnCount;
+
+            // 容量
+            var capacity = rowCount * columnCount + Mathf.Max(rowCount, columnCount) * 2;
+            for (var i = 0; i < capacity; i++)
+            {
+                _itemPool.Enqueue(New());
+            }
+        }
+
+        public Game_ItemComponent FetchTileItem()
+        {
+            var gridTile = _itemPool.Count == 0 ? New() : _itemPool.Dequeue();
             gridTile.Show();
 
             return gridTile;
         }
 
-        public Game_ItemComponent FetchTile(int rowIndex, int columnIndex)
-        {
-            var itemPoolComponent = World.Instance.Root.GetComponent<Game_ItemPoolComponent>();
-            var tileItem = itemPoolComponent.FetchTile();
-            var pos = World.Instance.Root.GetComponent<Game_BoardComponent>().GetWorldPosition(rowIndex, columnIndex);
-
-            tileItem.SetWorldPosition(pos);
-
-            return tileItem;
-        }
-
         // 回收一个 tile 回池中
-        public void RecycleTile(Game_ItemComponent tileItem)
+        public void RecycleTileItem(Game_ItemComponent itemComponent)
         {
-            // if (gridTile is IStatefulSlot statefulSlot)
-            // {
-            //     statefulSlot.ResetState();
-            // }
-
-            tileItem.Hide();
-            _itemsPool.Enqueue(tileItem);
+            itemComponent.Hide();
+            _itemPool.Enqueue(itemComponent);
         }
 
-        // 创建一个新的 tile gameObject
-        private Game_ItemComponent NewTile()
+        private Game_ItemComponent New()
         {
-            return _tilePrefab.CreateNew<Game_ItemComponent>(parent: _itemsParent);
+            var itemComponent = _itemPrefab.CreateNew<Game_ItemComponent>(parent: _itemsParent);
+            itemComponent.Hide();
+ 
+            return itemComponent;
         }
     }
 }

@@ -9,14 +9,18 @@ namespace Match3
         public SpriteRenderer SpriteRenderer { get; private set; }
         public Transform Transform => transform;
 
+        private System.Random _random;
+
         private void Awake()
         {
             SpriteRenderer = GetComponent<SpriteRenderer>();
+            _random = new System.Random();
         }
 
         public void Show()
         {
             gameObject.SetActive(true);
+            SetSprite();
         }
 
         public void Hide()
@@ -24,10 +28,12 @@ namespace Match3
             gameObject.SetActive(false);
         }
 
-        public void SetSprite(int spriteId, Sprite sprite)
+        private void SetSprite()
         {
-            ContentId = spriteId;
-            SpriteRenderer.sprite = sprite;
+            var sprites = World.Instance.data.artAtlas.GetSprites();
+            
+            ContentId = _random.Next(0, sprites.Length);
+            SpriteRenderer.sprite = sprites[ContentId];
         }
 
         public void SetWorldPosition(Vector3 worldPosition)
