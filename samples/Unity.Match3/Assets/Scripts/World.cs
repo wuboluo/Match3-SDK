@@ -17,21 +17,10 @@
                 Root.AddComponent(New_Game_SolveComponent());
                 Root.AddComponent(New_Game_AnimatedItemSwapperComponent());
                 Root.AddComponent(New_Game_RiseFillStrategyComponent());
+                Root.AddComponent(New_Game_PointerActionComponent());
+                Root.AddComponent(New_Game_JobComponent());
             }
         }
-
-        // /// 交换位置操作逻辑
-        // public UnityGame GetUnityGame()
-        // {
-        //     var gameConfig = new GameConfig
-        //     {
-        //         GameBoardData = data,
-        //         ItemSwapperComponent = new Game_AnimatedItemSwapperComponent(),
-        //         GameSolveComponent = new Game_SolveComponent(GetSequenceDetectors(), GetSpecialItemDetectors())
-        //     };
-        //
-        //     return new UnityGame(inputSystem, gameConfig);
-        // }
 
         /// 道具池组件
         private Game_ItemPoolComponent New_Game_ItemPoolComponent()
@@ -83,6 +72,17 @@
         private Game_RiseFillStrategyComponent New_Game_RiseFillStrategyComponent()
         {
             return new Game_RiseFillStrategyComponent();
+        }
+
+        /// 拖拽组件
+        private Game_PointerActionComponent New_Game_PointerActionComponent()
+        {
+            return new Game_PointerActionComponent();
+        }
+
+        private Game_JobComponent New_Game_JobComponent()
+        {
+            return new Game_JobComponent();
         }
     }
 }

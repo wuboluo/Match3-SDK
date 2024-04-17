@@ -7,7 +7,7 @@ namespace Match3
         private readonly Game_BoardComponent _boardComponent;
         private readonly CanvasInputSystem _inputSystem;
 
-        private GridPosition _slotDownPosition;
+        private GridPosition _downPosition;
         private bool _isDrag;
 
         public Game_PointerActionComponent()
@@ -22,8 +22,8 @@ namespace Match3
         private void OnPointerDown(object sender, PointerEventArgs pointer)
         {
             // 鼠标落在的位置的格子是否可移动
-            if (_boardComponent.IsPointerOnBoard(pointer.WorldPosition, out _slotDownPosition)
-                && _boardComponent.IsMovableSlot(_slotDownPosition))
+            if (_boardComponent.IsPointerOnBoard(pointer.WorldPosition, out _downPosition)
+                && _boardComponent.IsMovableSlot(_downPosition))
             {
                 _isDrag = true;
             }
@@ -45,8 +45,8 @@ namespace Match3
             }
 
             // 是同一个格子 or 不在一条直线上
-            if (_boardComponent.IsSameSlot(slotPosition)
-                || _boardComponent.IsDiagonalSlot(slotPosition))
+            if (_boardComponent.IsSameSlot(_downPosition, slotPosition) 
+                || _boardComponent.IsDiagonalSlot(_downPosition, slotPosition))
             {
                 return;
             }
@@ -54,7 +54,7 @@ namespace Match3
             _isDrag = false;
 
             // 鼠标落下的位置和当前位置交换 todo 是不是要在up的时候交换
-            _boardComponent.SwapItemsAsync(_slotDownPosition, slotPosition).Forget();
+            _boardComponent.SwapItemsAsync(_downPosition, slotPosition).Forget();
         }
     }
 }

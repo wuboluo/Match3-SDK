@@ -37,11 +37,25 @@ namespace Match3
 
             return gridTile;
         }
+        
+        public IGridTile FetchTile(int rowIndex, int columnIndex, TileType type)
+        {
+            var itemPoolComponent = World.Instance.Root.GetComponent<Game_ItemPoolComponent>();
+            var gridTile = itemPoolComponent.FetchTile(type);
+            var pos = World.Instance.Root.GetComponent<Game_BoardComponent>().GetWorldPosition(rowIndex, columnIndex);
+            
+            gridTile.SetWorldPosition(pos);
+
+            return gridTile;
+        }
 
         // 回收一个 tile 回池中
         public void RecycleTile(IGridTile gridTile)
         {
-            if (gridTile is IStatefulSlot statefulSlot) statefulSlot.ResetState();
+            if (gridTile is IStatefulSlot statefulSlot)
+            {
+                statefulSlot.ResetState();
+            }
 
             gridTile.SetActive(false);
             _itemsPool[(TileType)gridTile.TypeId].Enqueue(gridTile);

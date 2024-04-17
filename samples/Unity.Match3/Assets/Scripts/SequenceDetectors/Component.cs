@@ -5,7 +5,7 @@ namespace Match3
 {
     public abstract class Component
     {
-        public Dictionary<Type, object> SubComponents { get; set; }
+        private Dictionary<Type, object> SubComponents { get; set; }
 
         public T AddComponent<T>(T instance) where T : Component
         {
