@@ -1,8 +1,17 @@
-﻿namespace Match3
+﻿using System.Text;
+using UnityEngine;
+using UnityEngine.U2D;
+
+namespace Match3
 {
     public class World : MonoSingleton<World>
     {
-        public GameBoardData data;
+        public int rowCount = 5;
+        public int columnCount = 7;
+        public float tileSize = 0.6f;
+
+        public SpriteAtlas artAtlas;
+        public GameObject itemPrefab;
         public CanvasInputSystem inputSystem;
 
         public Game_RootComponent Root { get; private set; }
@@ -13,9 +22,10 @@
             {
                 Root.AddComponent(New_Game_ItemPoolComponent());
                 Root.AddComponent(New_Game_BoardComponent());
+                Root.AddComponent(New_Game_SwapComponent());
                 Root.AddComponent(New_Game_SolveComponent());
-                Root.AddComponent(New_Game_RiseFillStrategyComponent());
-                Root.AddComponent(New_Game_PointerActionComponent());
+                Root.AddComponent(New_Game_FillComponent());
+                Root.AddComponent(New_Game_PointerComponent());
                 Root.AddComponent(New_Game_JobComponent());
             }
         }
@@ -23,13 +33,13 @@
         /// 道具池组件
         private Game_ItemPoolComponent New_Game_ItemPoolComponent()
         {
-            return new Game_ItemPoolComponent(data.itemPrefab, data.transform);
+            return new Game_ItemPoolComponent(itemPrefab, transform);
         }
 
         /// 棋盘组件
         private Game_BoardComponent New_Game_BoardComponent()
         {
-            return new Game_BoardComponent(data.rowCount, data.columnCount, data.tileSize);
+            return new Game_BoardComponent(rowCount, columnCount, tileSize);
         }
 
         /// 消除组件
@@ -38,12 +48,12 @@
             return new Game_SolveComponent(GetSequenceDetectors(), GetSpecialItemDetectors());
 
             // 线性消除器
-            ILineDetect[] GetSequenceDetectors()
+            ILinearDetect[] GetSequenceDetectors()
             {
-                return new ILineDetect[]
+                return new ILinearDetect[]
                 {
-                    new Game_VerticalLineDetectComponent(),
-                    new Game_HorizontalLineDetectComponent()
+                    new GameVerticalLinearDetectComponent(),
+                    new GameHorizontalLinearDetectComponent()
                 };
             }
 
@@ -55,21 +65,41 @@
         }
 
         /// 填充策略组件
-        private Game_RiseFillStrategyComponent New_Game_RiseFillStrategyComponent()
+        private Game_FillComponent New_Game_FillComponent()
         {
-            return new Game_RiseFillStrategyComponent();
+            return new Game_FillComponent();
         }
 
         /// 拖拽组件
-        private Game_PointerActionComponent New_Game_PointerActionComponent()
+        private Game_PointerComponent New_Game_PointerComponent()
         {
-            return new Game_PointerActionComponent();
+            return new Game_PointerComponent();
         }
 
         /// Job执行组件
         private Game_JobComponent New_Game_JobComponent()
         {
             return new Game_JobComponent();
+        }
+
+        /// 交换组件
+        private Game_SwapComponent New_Game_SwapComponent()
+        {
+            return new Game_SwapComponent();
+        }
+
+        public void SolveSequenceDescription(LinearSolveSequenceData sequenceData)
+        {
+            var sb = new StringBuilder();
+            var detectorType = sequenceData.SequenceDetectorType.Name.Contains("Ver") ? "纵向" : "横向";
+
+            sb.Append($"棋子种类：<color=yellow>{sequenceData.SolvedSlotComponents[0].ItemComponent.ContentId}</color>");
+            sb.Append("  |  ");
+            sb.Append($"方向：<color=yellow>{detectorType}</color>");
+            sb.Append("  |  ");
+            sb.Append($"数量：<color=yellow>{sequenceData.SolvedSlotComponents.Count}</color>");
+
+            Debug.Log(sb.ToString());
         }
     }
 }
