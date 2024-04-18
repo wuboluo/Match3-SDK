@@ -3,7 +3,7 @@ using System.Collections.Generic;
 namespace Match3
 {
     /// 线性检测器
-    public class Game_LineDetectComponent : Component
+    public class Game_LinearDetectComponent : Component
     {
         /// 按方向获取序列
         public bool GetSequenceByDirection(Grid grid, IEnumerable<Grid> directions, out LinearSolveSequenceData sequenceData)

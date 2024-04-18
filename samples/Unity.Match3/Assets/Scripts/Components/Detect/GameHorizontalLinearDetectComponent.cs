@@ -8,12 +8,12 @@ namespace Match3
 
         public GameHorizontalLinearDetectComponent()
         {
-            AddComponent(new Game_LineDetectComponent());
+            AddComponent(new Game_LinearDetectComponent());
         }
 
         public bool GetSequence(Grid grid, out LinearSolveSequenceData sequenceData)
         {
-            return GetComponent<Game_LineDetectComponent>().GetSequenceByDirection(grid, _lineDirections, out sequenceData);
+            return GetComponent<Game_LinearDetectComponent>().GetSequenceByDirection(grid, _lineDirections, out sequenceData);
         }
     }
 }
